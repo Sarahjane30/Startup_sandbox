@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Startup Sandbox — Validate. Simulate. Learn.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="noise"></div>
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+
+  <nav class="navbar">
+    <div class="nav-inner wrap">
+      <a href="index.html" class="logo">SANDBOX<span class="logo-dot">.</span></a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link is-active">Analyze</a>
+        <a href="simulation.html" class="nav-link">Simulate</a>
+        <a href="learning.html" class="nav-link">Learn</a>
+      </div>
+      <a href="simulation.html" class="nav-cta">Run Simulation →</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-eyebrow">// REAL-TIME BUSINESS INTELLIGENCE</div>
+      <h1 class="hero-h1">See Every Product<br/>As A <span class="grad">Business</span></h1>
+      <p class="hero-lead">Instant marketing strategy, revenue model, competitive moat, and SWOT analysis for any product — powered by AI.</p>
+
+      <div class="search-shell">
+        <div class="search-box" id="searchBox">
+          <svg class="s-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input id="companyInput" class="s-input" placeholder="Enter company name (e.g. Stripe, Notion, Figma)" autocomplete="off" />
+          <button id="runBtn" class="s-btn">ANALYZE</button>
+        </div>
+        <div id="status" class="status-bar"></div>
+        <div class="quick-pills">
+          <span class="pill-label">Try:</span>
+          <button class="pill" onclick="quickRun('Stripe')">Stripe</button>
+          <button class="pill" onclick="quickRun('Notion')">Notion</button>
+          <button class="pill" onclick="quickRun('Figma')">Figma</button>
+          <button class="pill" onclick="quickRun('Shopify')">Shopify</button>
+          <button class="pill" onclick="quickRun('OpenAI')">OpenAI</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="how-section">
+      <div class="section-eyebrow">// HOW IT WORKS</div>
+      <h2 class="section-h2">Three Steps. Full Clarity.</h2>
+      <div class="steps-row">
+        <div class="step-card">
+          <div class="step-num">01</div>
+          <div class="step-title">Enter Any Product</div>
+          <p class="step-desc">Type any brand, startup, or company name.</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-card">
+          <div class="step-num">02</div>
+          <div class="step-title">AI Processes Data</div>
+          <p class="step-desc">Gemini pulls and interprets public intelligence instantly.</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step-card">
+          <div class="step-num">03</div>
+          <div class="step-title">See Everything</div>
+          <p class="step-desc">Get a full business dashboard with actionable insights.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section class="dashboard" id="analysisResults">
+      <div class="dash-header">
+        <div>
+          <div class="section-eyebrow">// ANALYSIS REPORT</div>
+          <h2 class="dash-company" id="dashCompany">ENTER A PRODUCT ABOVE</h2>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <article class="card">
+          <div class="card-label">BUSINESS MODEL</div>
+          <p id="businessModel" class="card-text muted-init">Run an analysis to see this section.</p>
+        </article>
+        <article class="card">
+          <div class="card-label">MARKETING INTELLIGENCE</div>
+          <p id="marketing" class="card-text muted-init">Run an analysis to see this section.</p>
+        </article>
+        <article class="card">
+          <div class="card-label">COMPETITIVE MOAT</div>
+          <p id="moat" class="card-text muted-init">Run an analysis to see this section.</p>
+        </article>
+
+        <!-- Metrics -->
+        <article class="card span-3">
+          <div class="card-label">BUSINESS METRICS</div>
+          <div class="kpi-row">
+            <div class="kpi">
+              <div class="kpi-top"><span>CONFIDENCE</span><span id="confidenceVal" class="kpi-val">0%</span></div>
+              <div class="bar-track"><div id="confidenceBar" class="bar-fill" style="width:0%"></div></div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-top"><span>CLARITY</span><span id="clarityVal" class="kpi-val">0%</span></div>
+              <div class="bar-track"><div id="clarityBar" class="bar-fill" style="width:0%"></div></div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-top"><span>DATA DEPTH</span><span id="depthVal" class="kpi-val">0%</span></div>
+              <div class="bar-track"><div id="depthBar" class="bar-fill" style="width:0%"></div></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- SWOT -->
+        <article class="card span-3">
+          <div class="card-label">SWOT ANALYSIS</div>
+          <div class="swot-grid">
+            <div class="swot-cell">
+              <div class="swot-head green">STRENGTHS</div>
+              <p id="swotS" class="card-text muted-init">Run analysis...</p>
+            </div>
+            <div class="swot-cell">
+              <div class="swot-head red">WEAKNESSES</div>
+              <p id="swotW" class="card-text muted-init">Run analysis...</p>
+            </div>
+            <div class="swot-cell">
+              <div class="swot-head blue">OPPORTUNITIES</div>
+              <p id="swotO" class="card-text muted-init">Run analysis...</p>
+            </div>
+            <div class="swot-cell">
+              <div class="swot-head yellow">THREATS</div>
+              <p id="swotT" class="card-text muted-init">Run analysis...</p>
+            </div>
+          </div>
+          <div id="swot" style="display:none;"></div>
+        </article>
+
+        <!-- Hidden Insight -->
+        <article class="card span-3 insight-card">
+          <div class="card-label primary-label">💡 THE HIDDEN INSIGHT</div>
+          <p id="insight" class="card-text muted-init">Run an analysis to see this section.</p>
+        </article>
+
+        <!-- Score breakdown -->
+        <article class="card span-3">
+          <div class="card-label">SCORE BREAKDOWN</div>
+          <div id="ratingExplain" class="score-list"></div>
+        </article>
+      </div>
+    </section>
+
+    <div class="meta-bar" id="meta"></div>
+
+    <div class="page-divider"></div>
+
+    <!-- IDEA VALIDATOR -->
+    <section class="idea-section">
+      <div class="section-eyebrow">// DEEP DIVE IDEA LAB</div>
+      <h2 class="section-h2">Validate Your<br/><span class="grad">Startup Idea.</span></h2>
+      <p class="hero-lead">Enter your idea and get an instant strategic breakdown from AI.</p>
+
+      <div class="idea-box">
+        <textarea id="ideaInput" placeholder="Paste your startup idea here. Include: who the customer is, what problem you solve, how your product works, and how you make money."></textarea>
+        <button id="ideaBtn" class="idea-submit-btn">VALIDATE IDEA →</button>
+      </div>
+    </section>
+
+    <!-- IDEA RESULTS -->
+    <section class="dashboard" id="ideaResults" style="display:none; padding-top:40px; border-top: 1px solid var(--border);">
+      <div class="dash-header idea-verdict-header">
+        <div class="verdict-score-wrap">
+          <div class="verdict-score" id="ideaScoreVal">--</div>
+          <div class="verdict-slash">/100</div>
+        </div>
+        <div class="verdict-text">
+          <div class="section-eyebrow">// THE VERDICT</div>
+          <div id="ideaTitle" class="verdict-decision">ANALYZING...</div>
+          <p id="ideaDesc" class="verdict-reason"></p>
+        </div>
+      </div>
+
+      <div class="idea-grid">
+        <article class="card">
+          <div class="card-label">🧬 IDEA MUTATIONS</div>
+          <div id="ideaMutations" class="card-text">...</div>
+        </article>
+        <article class="card">
+          <div class="card-label">⚔️ COPYCAT RISK & MOAT</div>
+          <div id="ideaCopycat" class="card-text">...</div>
+        </article>
+        <article class="card">
+          <div class="card-label">🧪 LIVE EXPERIMENTS</div>
+          <div id="ideaExperiments" class="card-text">...</div>
+        </article>
+        <article class="card">
+          <div class="card-label">⚠️ FOUNDER MISTAKE PREDICTOR</div>
+          <div id="ideaMistakes" class="card-text">...</div>
+        </article>
+        <article class="card span-2 insight-card">
+          <div class="card-label primary-label">💡 THE HIDDEN OPPORTUNITY</div>
+          <p id="ideaOpportunity" class="card-text" style="font-style:italic; font-size:1.1rem;">...</p>
+        </article>
+        <article class="card span-2" id="chartCard" style="display:none;">
+          <div class="card-label">📊 DIMENSIONAL ANALYSIS</div>
+          <div style="position:relative; height:320px; width:100%; display:flex; justify-content:center; margin-top:16px;">
+            <canvas id="ideaChart"></canvas>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- CTA TO OTHER PAGES -->
+    <section class="cta-section">
+      <div class="cta-cards">
+        <a href="simulation.html" class="cta-card">
+          <div class="cta-icon">🔮</div>
+          <div class="cta-label">SIMULATION ENGINE</div>
+          <div class="cta-title">Project Your Future</div>
+          <p class="cta-desc">See 3-month, 6-month, and 1-year trajectories for your startup idea.</p>
+          <div class="cta-arrow">→</div>
+        </a>
+        <a href="learning.html" class="cta-card">
+          <div class="cta-icon">🎮</div>
+          <div class="cta-label">LEARNING PLATFORM</div>
+          <div class="cta-title">Learn Like Duolingo</div>
+          <p class="cta-desc">Gamified business lessons on validation, MVP, pricing, and more.</p>
+          <div class="cta-arrow">→</div>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner wrap">
+      <div class="logo-sm">SANDBOX<span class="logo-dot">.</span></div>
+      <div class="footer-nav">
+        <a href="index.html">Analyze</a>
+        <a href="simulation.html">Simulate</a>
+        <a href="learning.html">Learn</a>
+      </div>
+      <div class="footer-copy">Built with Gemini AI</div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

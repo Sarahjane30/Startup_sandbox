@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Startup Sandbox — Simulation Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="noise"></div>
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+
+  <nav class="navbar">
+    <div class="nav-inner wrap">
+      <a href="index.html" class="logo">SANDBOX<span class="logo-dot">.</span></a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">Analyze</a>
+        <a href="simulation.html" class="nav-link is-active">Simulate</a>
+        <a href="learning.html" class="nav-link">Learn</a>
+      </div>
+      <a href="learning.html" class="nav-cta">Start Learning →</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+
+    <!-- HERO -->
+    <section class="sim-hero">
+      <div class="hero-eyebrow">// STARTUP SIMULATION ENGINE</div>
+      <h1 class="hero-h1">Project Your<br/><span class="grad">Startup's Future</span></h1>
+      <p class="hero-lead">Enter your startup idea and get AI-generated 3-month, 6-month, and 1-year projections — users, revenue, retention, and failure modes.</p>
+
+      <div class="sim-input-wrap">
+        <textarea
+          id="simInput"
+          class="sim-textarea"
+          placeholder="Describe your startup: who is the customer, what problem do you solve, how do you make money, and what's your launch plan?"
+        ></textarea>
+        <div class="sim-input-row">
+          <select id="simStage" style="flex:1; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); padding: 14px 16px; font-family: var(--font-body); font-size: 0.95rem; outline: none; cursor: pointer;">
+            <option value="idea">Stage: Just an Idea</option>
+            <option value="mvp">Stage: MVP Built</option>
+            <option value="launched">Stage: Launched (Pre-revenue)</option>
+            <option value="early-revenue">Stage: Early Revenue</option>
+            <option value="scaling">Stage: Scaling</option>
+          </select>
+          <button id="simBtn" class="sim-btn">RUN SIMULATION →</button>
+        </div>
+        <div id="simStatus" class="status-bar"></div>
+      </div>
+    </section>
+
+    <!-- RESULTS -->
+    <section id="simResults" style="display:none;">
+
+      <!-- Summary banner -->
+      <div id="simSummaryBanner" class="card span-3" style="margin-bottom: 24px; border-color: rgba(79,142,255,0.3); background: linear-gradient(145deg, rgba(79,142,255,0.08), var(--bg-card));">
+        <div class="card-label primary-label">📊 SIMULATION SUMMARY</div>
+        <p id="simSummaryText" class="card-text" style="font-size: 1.05rem;"></p>
+      </div>
+
+      <!-- Top metrics -->
+      <div class="sim-grid" id="simMetricsGrid" style="margin-bottom: 32px;"></div>
+
+      <!-- Timeline -->
+      <div class="section-eyebrow" style="margin-bottom: 24px;">// GROWTH TIMELINE</div>
+      <div class="timeline" id="simTimeline"></div>
+
+      <!-- Charts -->
+      <div class="section-eyebrow" style="margin-top: 48px; margin-bottom: 24px;">// PROJECTIONS</div>
+      <div class="sim-grid">
+        <div class="sim-card">
+          <div class="sim-card-title">USER GROWTH</div>
+          <div style="position:relative; height:200px;">
+            <canvas id="usersChart"></canvas>
+          </div>
+        </div>
+        <div class="sim-card">
+          <div class="sim-card-title">REVENUE GROWTH</div>
+          <div style="position:relative; height:200px;">
+            <canvas id="revenueChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Failure mode + investor reaction -->
+      <div class="dash-grid" style="margin-top: 20px; margin-bottom: 80px;">
+        <article class="card">
+          <div class="card-label">💀 FAILURE TIMELINE</div>
+          <div id="simFailure" class="card-text"></div>
+        </article>
+        <article class="card">
+          <div class="card-label">💼 INVESTOR REACTION</div>
+          <div id="simInvestor" class="card-text"></div>
+        </article>
+        <article class="card">
+          <div class="card-label">👤 USER REACTION</div>
+          <div id="simUser" class="card-text"></div>
+        </article>
+        <article class="card span-3 insight-card">
+          <div class="card-label primary-label">🎯 KEY STRATEGIC MOVES</div>
+          <div id="simMoves" class="card-text"></div>
+        </article>
+      </div>
+
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section" id="simCta">
+      <div class="cta-cards">
+        <a href="index.html" class="cta-card">
+          <div class="cta-icon">🔍</div>
+          <div class="cta-label">ANALYZE</div>
+          <div class="cta-title">Analyze Any Company</div>
+          <p class="cta-desc">Get full business intelligence on any existing product or brand.</p>
+          <div class="cta-arrow">→</div>
+        </a>
+        <a href="learning.html" class="cta-card">
+          <div class="cta-icon">🎮</div>
+          <div class="cta-label">LEARNING PLATFORM</div>
+          <div class="cta-title">Learn Like Duolingo</div>
+          <p class="cta-desc">Gamified business lessons on validation, MVP, pricing, and growth.</p>
+          <div class="cta-arrow">→</div>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner wrap">
+      <div class="logo-sm">SANDBOX<span class="logo-dot">.</span></div>
+      <div class="footer-nav">
+        <a href="index.html">Analyze</a>
+        <a href="simulation.html">Simulate</a>
+        <a href="learning.html">Learn</a>
+      </div>
+      <div class="footer-copy">Powered by Gemini AI</div>
+    </div>
+  </footer>
+
+  <script src="simulation.js"></script>
+</body>
+</html>

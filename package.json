@@ -1,0 +1,14 @@
+{
+  "name": "biz-angle-analyzer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "powershell -NoProfile -Command \"$env:PORT=3100; node server.mjs\"",
+    "dev": "powershell -NoProfile -Command \"$env:PORT=3100; node --watch server.mjs\""
+  },
+  "dependencies": {
+    "@google/genai": "^1.51.0",
+    "dotenv": "^17.4.2"
+  }
+}
