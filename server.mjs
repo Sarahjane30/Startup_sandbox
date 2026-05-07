@@ -589,15 +589,33 @@ function startupSimSchema() {
 }
 
 async function generateFounderSimulation(prompt) {
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: prompt,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: startupSimSchema()
+  const maxRetries = 3;
+  const baseDelay = 1000;
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: startupSimSchema()
+        }
+      });
+      return JSON.parse(response.text);
+    } catch (err) {
+      const isLastAttempt = attempt === maxRetries - 1;
+      const isRetryable = err?.status === 503 || err?.status === 429;
+      
+      if (!isRetryable || isLastAttempt) {
+        throw err;
+      }
+      
+      const delayMs = baseDelay * Math.pow(2, attempt);
+      console.log(`Gemini API attempt ${attempt + 1} failed (${err?.status}). Retrying in ${delayMs}ms...`);
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
-  });
-  return JSON.parse(response.text);
+  }
 }
 
 function compactSimState(state) {
@@ -717,6 +735,32 @@ function fallbackRound(month, visible, startup, lastOutcome = "") {
   };
 }
 
+function buildStartupNarrative(founder, startup, visible) {
+  const founderType = norm(founder?.founderType) || "founder";
+  const industry = safeText(startup?.industry) || "your space";
+  const stage = safeText(startup?.startupStage) || "early";
+  const isBB = norm(startup?.customerType).includes("b2b");
+  
+  const narratives = {
+    "College student": `You launched from campus with ${moneyText(visible.cash)} in savings. The energy is high, but time is your constraint.`,
+    "Working professional": `You left your job with ${moneyText(visible.cash)} and some severance. The pressure to prove this works is real.`,
+    "Full-time founder": `You are betting your entire focus on this. With ${moneyText(visible.cash)}, every decision compounds.`,
+    "Repeat founder": `You have been here before. This time, with ${moneyText(visible.cash)}, you are moving faster and trusting your instincts more.`,
+  };
+  
+  const openingLine = narratives[founderType] || `You are starting this ${industry} venture with ${moneyText(visible.cash)}.`;
+  const stageContext = stage.includes("Idea") ? "Your MVP is a rough sketch."
+    : stage.includes("MVP") ? "Your MVP works, but only you know how it works."
+    : stage.includes("pre-revenue") ? "You have product-market fit signals but no paying customers yet."
+    : "You have early revenue, but the path to scale is not clear yet.";
+  
+  const customerContext = isBB
+    ? `You are targeting ${safeText(startup?.customerType)} customers. Enterprise cycles are long, but the deals are bigger.`
+    : `You are targeting ${safeText(startup?.customerType)} users. Virality is possible, but retention is fragile.`;
+  
+  return `${openingLine} ${stageContext} ${customerContext} The simulation will test whether you can find verified demand before runway becomes your only decision maker.`;
+}
+
 function fallbackInitialSimulation(founder, startup) {
   const cash = simNumber(founder?.money, 25000);
   const burn = Math.max(1, simNumber(founder?.monthlyBurn, 4000));
@@ -743,10 +787,17 @@ function fallbackInitialSimulation(founder, startup) {
     investorInterest: simClamp(24 + audienceBoost + knowledgeBoost),
     technicalDebt: simClamp(hasTech ? 22 : 45)
   };
+  
+  const patterns = [
+    "Your path currently resembles early Airbnb-style manual learning, with a possible Quibi-style risk if you overbuild before proving demand.",
+    "Your path currently resembles a disciplined early-stage team trading vanity metrics for verified demand signals.",
+    "Your path currently resembles the pivot risk that hit many first-time founders: building in isolation before customer contact."
+  ];
+  const patternIndex = (safeText(startup?.industry).length + safeText(founder?.founderType).length) % patterns.length;
 
   return {
-    summary: `You are starting with ${moneyText(cash)} in cash and about ${runwayMonths} months of runway. The simulation will reward evidence from customers over theatrical momentum.`,
-    patternMatch: "Your path currently resembles early Airbnb-style manual learning, with a possible Quibi-style risk if you overbuild before proving demand.",
+    summary: buildStartupNarrative(founder, startup, visible),
+    patternMatch: patterns[patternIndex],
     founder,
     startup,
     visible,
@@ -767,7 +818,9 @@ function fallbackInitialSimulation(founder, startup) {
       why: "At this stage, the scarcest resource is not code or pitch polish. It is verified demand before runway disappears."
     },
     chartData: fallbackChartPoint("Month 1", visible),
-    history: []
+    history: [],
+    _fallback: true,
+    _fallbackNote: "Running with fallback simulation. The AI model was temporarily unavailable."
   };
 }
 
@@ -899,7 +952,8 @@ Return only JSON in the required schema.`;
       history: Array.isArray(result.history) ? result.history : []
     };
   } catch (err) {
-    console.error("Simulation LLM Error:", err);
+    console.error("Simulation LLM Error:", err?.message || err);
+    console.log("Falling back to deterministic simulation...");
     return fallbackInitialSimulation(founder, startup);
   }
 }

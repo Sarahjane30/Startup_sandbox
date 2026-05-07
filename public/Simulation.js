@@ -1,227 +1,358 @@
-// =============================================
+﻿// =============================================
 //  STARTUP SANDBOX — simulation.js
-//  All projections come from Gemini API.
+//  Controls the Founder Decision Simulator page.
 // =============================================
 
 const $ = (id) => document.getElementById(id);
 
-let usersChartInst = null;
-let revenueChartInst = null;
+const ui = {
+  simBtn: $('simBtn'),
+  simStatus: $('simStatus'),
+  simResults: $('simResults'),
+  simSummaryText: $('simSummaryText'),
+  startupPattern: $('startupPattern'),
+  simMetricsGrid: $('simMetricsGrid'),
+  healthMeters: $('healthMeters'),
+  decisionRound: $('decisionRound'),
+  monthlyTimeline: $('monthlyTimeline'),
+  coachPanel: $('coachPanel'),
+  founderLog: $('founderLog'),
+};
 
-// ─── Gemini helper ──────────────────────────────────────────────
-async function callGemini(prompt) {
-  throw new Error("Direct Gemini calls have moved to the backend.");
+const chartInstances = {};
+let currentSimState = null;
+
+function setStatus(message) {
+  if (ui.simStatus) ui.simStatus.textContent = message || '';
 }
 
-// ─── Build simulation prompt ─────────────────────────────────────
-function buildPrompt(idea, stage) {
-  return `
-You are a Y Combinator partner, experienced venture capitalist, and startup data scientist.
-Simulate the realistic future of this startup idea.
-
-Startup idea: "${idea}"
-Current stage: "${stage}"
-
-Return ONLY valid JSON (no markdown, no explanation) matching this exact schema:
-
-{
-  "summary": "string (2-3 sentence executive summary of the startup's trajectory)",
-  "topMetrics": {
-    "survivabilityScore": <number 0-100>,
-    "fundingLikelihood": <number 0-100>,
-    "marketFitScore": <number 0-100>,
-    "burnRunway": "string (e.g. '8 months at lean burn')"
-  },
-  "timeline": [
-    {
-      "period": "Month 1-3",
-      "title": "string (phase name, e.g. 'Building the Foundation')",
-      "narrative": "string (2-3 sentences of what happens in this phase)",
-      "metrics": {
-        "users": "string (e.g. '0 → 200 users')",
-        "revenue": "string (e.g. '$0 → $800 MRR')",
-        "retention": "string (e.g. '~45% week-1 retention')",
-        "keyEvent": "string (the defining moment of this phase)"
-      }
-    },
-    {
-      "period": "Month 4-6",
-      "title": "string",
-      "narrative": "string (2-3 sentences)",
-      "metrics": {
-        "users": "string",
-        "revenue": "string",
-        "retention": "string",
-        "keyEvent": "string"
-      }
-    },
-    {
-      "period": "Month 7-12",
-      "title": "string",
-      "narrative": "string (2-3 sentences)",
-      "metrics": {
-        "users": "string",
-        "revenue": "string",
-        "retention": "string",
-        "keyEvent": "string"
-      }
-    }
-  ],
-  "chartData": {
-    "labels": ["Month 1", "Month 2", "Month 3", "Month 4", "Month 5", "Month 6", "Month 9", "Month 12"],
-    "users": [<number>, <number>, <number>, <number>, <number>, <number>, <number>, <number>],
-    "revenue": [<number>, <number>, <number>, <number>, <number>, <number>, <number>, <number>]
-  },
-  "failureTimeline": "string (3-4 sentences describing the most likely path to failure and when it would happen)",
-  "investorReaction": "string (2-3 sentences on what a seed-stage VC would say about this opportunity)",
-  "userReaction": "string (2-3 sentences on what early users would say — positive and negative)",
-  "strategicMoves": "string (3-4 concrete, specific actions this founder should take in the next 90 days)"
-}
-`;
+function getValue(id) {
+  const el = $(id);
+  return el ? el.value.trim() : '';
 }
 
-// ─── Render results ──────────────────────────────────────────────
-function renderSim(data) {
-  $("simResults").style.display = "block";
-  $("simCta").style.display = "none";
+function getNumber(id, fallback = 0) {
+  const value = Number(getValue(id));
+  return Number.isFinite(value) ? value : fallback;
+}
 
-  // Summary
-  $("simSummaryText").textContent = data.summary || "";
-
-  // Top metrics
-  const tm = data.topMetrics || {};
-  const metricsHTML = [
-    { label: "Survivability", val: `${tm.survivabilityScore ?? "--"}/100`, icon: "🛡️" },
-    { label: "Funding Likelihood", val: `${tm.fundingLikelihood ?? "--"}/100`, icon: "💰" },
-    { label: "Market Fit Score", val: `${tm.marketFitScore ?? "--"}/100`, icon: "🎯" },
-    { label: "Burn Runway", val: tm.burnRunway || "--", icon: "🔥" },
-  ].map(({ label, val, icon }) => `
-    <div class="sim-card" style="display:flex; flex-direction:column; align-items:center; text-align:center; padding:28px;">
-      <div style="font-size:2rem; margin-bottom:12px;">${icon}</div>
-      <div class="sim-card-title">${label}</div>
-      <div style="font-family: var(--font-display); font-weight:800; font-size:2rem; color:var(--primary); line-height:1;">${val}</div>
-    </div>
-  `).join("");
-  $("simMetricsGrid").innerHTML = metricsHTML;
-  $("simMetricsGrid").style.gridTemplateColumns = "repeat(4, 1fr)";
-
-  // Timeline
-  const timeline = data.timeline || [];
-  const periodColors = ["var(--primary)", "var(--accent)", "var(--green)"];
-  $("simTimeline").innerHTML = timeline.map((item, i) => `
-    <div class="timeline-item">
-      <div class="timeline-dot" style="border-color: ${periodColors[i] || "var(--primary)"}; color: ${periodColors[i] || "var(--primary)"};">
-        ${item.period?.replace("Month ", "Mo\n") || `P${i+1}`}
-      </div>
-      <div class="timeline-content">
-        <div class="timeline-title">${item.title || item.period}</div>
-        <div class="timeline-metrics">
-          <div class="tm"><div class="tm-label">USERS</div><div class="tm-val" style="color:${periodColors[i] || "var(--primary)"};">${item.metrics?.users || "--"}</div></div>
-          <div class="tm"><div class="tm-label">REVENUE</div><div class="tm-val" style="color:${periodColors[i] || "var(--primary)"};">${item.metrics?.revenue || "--"}</div></div>
-          <div class="tm"><div class="tm-label">RETENTION</div><div class="tm-val" style="color:${periodColors[i] || "var(--primary)"};">${item.metrics?.retention || "--"}</div></div>
-        </div>
-        <p class="card-text" style="margin-bottom:12px;">${item.narrative || ""}</p>
-        <div style="font-family:var(--font-mono); font-size:0.78rem; color:var(--muted); background:rgba(0,0,0,0.2); border:1px solid var(--border); border-radius:6px; padding:10px 14px;">
-          🔑 KEY EVENT: ${item.metrics?.keyEvent || ""}
-        </div>
-      </div>
-    </div>
-  `).join("");
-
-  // Charts
-  const cd = data.chartData || {};
-  const labels = cd.labels || [];
-  const chartDefaults = {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
-    scales: {
-      x: {
-        grid: { color: "rgba(255,255,255,0.05)" },
-        ticks: { color: "rgba(255,255,255,0.4)", font: { family: "DM Mono", size: 11 } }
-      },
-      y: {
-        grid: { color: "rgba(255,255,255,0.05)" },
-        ticks: { color: "rgba(255,255,255,0.4)", font: { family: "DM Mono", size: 11 } }
-      }
-    }
+function collectFounder() {
+  return {
+    money: getNumber('money', 25000),
+    monthlyBurn: getNumber('monthlyBurn', 4000),
+    teamSize: getNumber('teamSize', 2),
+    technicalCofounder: getValue('technicalCofounder'),
+    founderType: getValue('founderType'),
+    country: getValue('country'),
+    riskTolerance: getValue('riskTolerance'),
+    startupStage: getValue('startupStage'),
+    audience: getValue('audience'),
+    industryExperience: getValue('industryExperience'),
+    timeCommitment: getValue('timeCommitment'),
+    personality: getValue('personality'),
   };
-
-  if (usersChartInst) usersChartInst.destroy();
-  usersChartInst = new Chart($("usersChart").getContext("2d"), {
-    type: "line",
-    data: {
-      labels,
-      datasets: [{
-        data: cd.users || [],
-        borderColor: "rgba(79,142,255,1)",
-        backgroundColor: "rgba(79,142,255,0.1)",
-        fill: true, tension: 0.4, pointRadius: 4,
-        pointBackgroundColor: "rgba(79,142,255,1)",
-      }]
-    },
-    options: { ...chartDefaults }
-  });
-
-  if (revenueChartInst) revenueChartInst.destroy();
-  revenueChartInst = new Chart($("revenueChart").getContext("2d"), {
-    type: "line",
-    data: {
-      labels,
-      datasets: [{
-        data: cd.revenue || [],
-        borderColor: "rgba(167,139,250,1)",
-        backgroundColor: "rgba(167,139,250,0.1)",
-        fill: true, tension: 0.4, pointRadius: 4,
-        pointBackgroundColor: "rgba(167,139,250,1)",
-      }]
-    },
-    options: { ...chartDefaults }
-  });
-
-  // Bottom cards
-  $("simFailure").innerHTML = data.failureTimeline || "";
-  $("simInvestor").innerHTML = data.investorReaction || "";
-  $("simUser").innerHTML = data.userReaction || "";
-  if ($("simMoves")) {
-    $("simMoves").innerHTML = data.strategicMoves
-      ? data.strategicMoves.split(/\n|\. /).filter(s => s.trim().length > 5)
-          .map(s => `<p style="margin-bottom:10px;">→ ${s.trim().replace(/^\d+\.\s*/, "")}</p>`).join("")
-      : "";
-  }
 }
 
-// ─── Main run ───────────────────────────────────────────────────
-async function runSimulation() {
-  const idea = $("simInput")?.value.trim();
-  const stage = $("simStage")?.value || "idea";
-  if (!idea) return ($("simStatus").textContent = "Enter your startup idea first.");
+function collectStartup() {
+  return {
+    idea: getValue('idea'),
+    industry: getValue('industry'),
+    customerType: getValue('customerType'),
+    businessModel: getValue('businessModel'),
+    aiDependency: getValue('aiDependency'),
+    productType: getValue('productType'),
+    revenueModel: getValue('revenueModel'),
+  };
+}
 
-  $("simStatus").textContent = "⏳ Running simulation with Gemini AI...";
-  $("simBtn").disabled = true;
-  $("simBtn").textContent = "SIMULATING...";
-  $("simResults").style.display = "none";
+function formatNumber(value, suffix = '') {
+  if (typeof value !== 'number' || Number.isNaN(value)) return '--';
+  return `${Math.round(value).toLocaleString()}${suffix}`;
+}
+
+function formatPercent(value) {
+  if (typeof value !== 'number' || Number.isNaN(value)) return '--';
+  return `${Math.round(value)}%`;
+}
+
+function renderMetrics(visible = {}) {
+  if (!ui.simMetricsGrid) return;
+  const cards = [
+    { label: 'Cash', value: formatNumber(visible.cash, ' USD') },
+    { label: 'Runway', value: `${visible.runwayMonths ?? '--'} months` },
+    { label: 'Users', value: formatNumber(visible.users) },
+    { label: 'Growth', value: formatPercent(visible.growth) },
+    { label: 'Retention', value: formatPercent(visible.retention) },
+    { label: 'Investor interest', value: formatPercent(visible.investorInterest) },
+    { label: 'Morale', value: formatPercent(visible.morale) },
+    { label: 'Health', value: formatPercent(visible.healthScore) },
+    { label: 'Dilution', value: formatPercent(visible.dilution) },
+  ];
+
+  ui.simMetricsGrid.innerHTML = cards
+    .map(({ label, value }) => `
+      <div class="sim-card">
+        <div class="sim-card-title">${label}</div>
+        <div class="sim-card-value">${value}</div>
+      </div>
+    `)
+    .join('');
+}
+
+function renderHealthMeters(visible = {}) {
+  if (!ui.healthMeters) return;
+  const items = [
+    { label: 'Runway', value: visible.runwayMonths ?? 0, max: 24 },
+    { label: 'Health', value: visible.healthScore ?? 0, max: 100 },
+    { label: 'Stress', value: visible.founderStress ?? 0, max: 100, invert: true },
+  ];
+
+  ui.healthMeters.innerHTML = items
+    .map(({ label, value, max, invert }) => {
+      const normalized = Math.max(0, Math.min(100, Math.round((value / max) * 100)));
+      const width = invert ? 100 - normalized : normalized;
+      return `
+        <div class="meter-row">
+          <div class="meter-label">${label}</div>
+          <div class="meter-bar"><div class="meter-fill" style="width:${width}%"></div></div>
+        </div>
+      `;
+    })
+    .join('');
+}
+
+function renderDecisionRound(round = {}) {
+  if (!ui.decisionRound) return;
+  const title = round.title || `Month ${round.month || 1}`;
+  const description = round.summary || round.prompt || round.description || '';
+  const choices = Array.isArray(round.choices) ? round.choices : [];
+
+  ui.decisionRound.innerHTML = `
+    <div class="sim-card-title">${title}</div>
+    <p class="card-text">${description}</p>
+    <div class="decision-actions"></div>
+  `;
+
+  const actions = ui.decisionRound.querySelector('.decision-actions');
+  if (!actions) return;
+
+  if (!choices.length) {
+    actions.innerHTML = '<div class="muted-init">No choices found for this round.</div>';
+    return;
+  }
+
+  choices.forEach((choice) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'sim-choice-btn';
+    const label = choice.label || choice.title || '';
+    btn.innerHTML = `
+      <span>${choice.id}: ${label}</span>
+      <span aria-hidden="true">→</span>
+    `;
+    btn.addEventListener('click', async () => {
+      await submitDecision(choice.id);
+    });
+    actions.appendChild(btn);
+  });
+}
+
+function renderTimeline(chartData = {}) {
+  if (!ui.monthlyTimeline) return;
+  const labels = Array.isArray(chartData.labels) ? chartData.labels : [];
+  const runway = Array.isArray(chartData.runway) ? chartData.runway : [];
+  const users = Array.isArray(chartData.users) ? chartData.users : [];
+
+  if (!labels.length) {
+    ui.monthlyTimeline.innerHTML = '<div class="muted-init">Timeline will appear after your first decision.</div>';
+    return;
+  }
+
+  ui.monthlyTimeline.innerHTML = `
+    <div class="timeline-grid">
+      ${labels
+        .map((label, index) => `
+          <div class="timeline-step">
+            <div class="timeline-month">${label}</div>
+            <div class="timeline-value"><strong>Users:</strong> ${formatNumber(users[index])}</div>
+            <div class="timeline-value"><strong>Runway:</strong> ${runway[index] ?? '--'}m</div>
+          </div>
+        `)
+        .join('')}
+    </div>
+  `;
+}
+
+function renderCoachPanel(lesson = {}, round = {}) {
+  if (!ui.coachPanel) return;
+  const advice = lesson?.why || lesson?.smartChoice || lesson?.beginnerChoice || 'Watch how your decisions affect runway, equity, and momentum.';
+  ui.coachPanel.innerHTML = `
+    <div class="sim-card">
+      <div class="sim-card-title">Founder Coach</div>
+      <p class="card-text">${advice}</p>
+      ${round.randomEvent ? `<p class="card-text"><strong>Random event:</strong> ${round.randomEvent}</p>` : ''}
+    </div>
+  `;
+}
+
+function renderFounderLog(history = []) {
+  if (!ui.founderLog) return;
+  ui.founderLog.innerHTML = history.length
+    ? history
+        .map(
+          (entry) => `
+            <div class="log-entry">
+              <div class="log-month">Month ${entry.month || ''} — ${entry.choice || ''}</div>
+              <div class="log-text">${entry.outcome || entry.summary || entry.note || ''}</div>
+            </div>
+          `
+        )
+        .join('')
+    : '<div class="muted-init">Your founder log will appear here as you make decisions.</div>';
+}
+
+function renderCharts(chartData = {}) {
+  if (typeof Chart !== 'function') return;
+
+  const chartConfig = (label, data, color = 'rgba(79,142,255,0.9)') => ({
+    type: 'line',
+    data: {
+      labels: chartData.labels || [],
+      datasets: [
+        {
+          label,
+          data: data || [],
+          fill: false,
+          borderColor: color,
+          backgroundColor: color,
+          tension: 0.35,
+          pointRadius: 3,
+          pointBackgroundColor: color,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#fff' }, grid: { display: false } },
+        y: { ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.08)' } }
+      }
+    }
+  });
+
+  const chartMap = [
+    { id: 'runwayChart', label: 'Runway', data: chartData.runway, color: 'rgba(79,142,255,1)' },
+    { id: 'usersChart', label: 'Users', data: chartData.users, color: 'rgba(34,197,94,1)' },
+    { id: 'revenueChart', label: 'Revenue', data: chartData.revenue, color: 'rgba(249,115,22,1)' },
+    { id: 'equityChart', label: 'Equity Left', data: chartData.equity || (Array.isArray(chartData.dilution) ? chartData.dilution.map((v) => 100 - v) : []), color: 'rgba(234,179,8,1)' },
+  ];
+
+  chartMap.forEach(({ id, label, data, color }) => {
+    const canvas = $(id);
+    if (!canvas) return;
+    if (chartInstances[id]) {
+      chartInstances[id].destroy();
+      chartInstances[id] = null;
+    }
+    try {
+      chartInstances[id] = new Chart(canvas.getContext('2d'), chartConfig(label, data, color));
+    } catch (error) {
+      console.warn('Chart render failed for', id, error);
+    }
+  });
+}
+
+async function submitDecision(choiceId) {
+  if (!currentSimState) return;
+  setStatus(`Processing decision ${choiceId}...`);
+  disableChoices(true);
 
   try {
-    const res = await fetch("/api/simulate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idea, stage })
+    const response = await fetch('/api/simulate/decision', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ state: currentSimState, choiceId }),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data?.error || `Simulation failed: ${res.status}`);
-    renderSim(data);
-    $("simStatus").textContent = "✓ Simulation complete";
-    $("simResults").scrollIntoView({ behavior: "smooth", block: "start" });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Decision failed');
+    currentSimState = result;
+    renderSimulation(result);
+    setStatus(`Decision ${choiceId} applied. Continue the simulation.`);
   } catch (err) {
-    $("simStatus").textContent = `Error: ${err.message}`;
+    setStatus(`Error: ${err.message}`);
     console.error(err);
   } finally {
-    $("simBtn").disabled = false;
-    $("simBtn").textContent = "RUN SIMULATION →";
+    disableChoices(false);
   }
 }
 
-$("simBtn")?.addEventListener("click", runSimulation);
-$("simInput")?.addEventListener("keydown", e => {
-  if (e.key === "Enter" && e.ctrlKey) runSimulation();
+function disableChoices(disabled) {
+  if (!ui.decisionRound) return;
+  ui.decisionRound.querySelectorAll('button').forEach((button) => {
+    button.disabled = disabled;
+  });
+}
+
+function renderSimulation(state) {
+  if (!state) return;
+  if (ui.simResults) ui.simResults.style.display = 'block';
+  if (ui.simSummaryText) ui.simSummaryText.textContent = state.summary || state.startup?.idea || 'Startup simulation in progress.';
+  if (ui.startupPattern) ui.startupPattern.textContent = state.patternMatch || state.pattern || '';
+
+  // Show fallback warning if needed
+  if (state._fallback) {
+    setStatus('⚠️ Running with fallback simulation (AI model unavailable). Retrying...');
+  }
+
+  renderMetrics(state.visible || {});
+  renderHealthMeters(state.visible || {});
+  renderDecisionRound(state.round || {});
+  renderTimeline(state.chartData || {});
+  renderCoachPanel(state.lesson || {}, state.round || {});
+  renderFounderLog(state.history || []);
+  renderCharts(state.chartData || {});
+}
+
+async function startSimulation() {
+  setStatus('Launching simulation...');
+  if (ui.simBtn) {
+    ui.simBtn.disabled = true;
+    ui.simBtn.textContent = 'LOADING...';
+  }
+
+  const founder = collectFounder();
+  const startup = collectStartup();
+
+  try {
+    const response = await fetch('/api/simulate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ founder, startup }),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Simulation initialization failed.');
+    currentSimState = result;
+    renderSimulation(result);
+    setStatus('Simulation ready. Make your first decision.');
+  } catch (err) {
+    setStatus(`Error: ${err.message}`);
+    console.error(err);
+  } finally {
+    if (ui.simBtn) {
+      ui.simBtn.disabled = false;
+      ui.simBtn.textContent = 'START DECISION SIM';
+    }
+  }
+}
+
+if (ui.simBtn) {
+  ui.simBtn.addEventListener('click', startSimulation);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  if (currentSimState) {
+    renderSimulation(currentSimState);
+  }
 });

@@ -256,14 +256,14 @@ function renderIdea(data) {
     });
   }
 
-  if (ui.meta) ui.meta.innerHTML = `<strong>Powered by Gemini AI</strong> — Idea scored at <strong>${a.viabilityScore ?? "--"}/100</strong>`;
+  if (ui.meta) ui.meta.innerHTML = `<strong>Idea Evaluation</strong> — Score: <strong>${a.viabilityScore ?? "--"}/100</strong>`;
 }
 
 // ─── Run company analysis ───────────────────────────────────────
 async function run() {
   const company = ui.companyInput?.value.trim();
   if (!company) return setStatus("Enter a company name first.");
-  setStatus("⏳ Analyzing with Gemini AI...");
+  setStatus("⏳ Analyzing...");
   if (ui.runBtn) ui.runBtn.disabled = true;
   showSkeletons();
 
@@ -301,7 +301,7 @@ ui.companyInput?.addEventListener("keydown", e => { if (e.key === "Enter") run()
 ui.ideaBtn?.addEventListener("click", async () => {
   const idea = ui.ideaInput?.value.trim();
   if (!idea) return setStatus("Paste your startup idea first.");
-  setStatus("⏳ Evaluating idea with Gemini AI...");
+  setStatus("⏳ Evaluating idea...");
   if (ui.ideaBtn) {
     ui.ideaBtn.disabled = true;
     ui.ideaBtn.textContent = "ANALYZING...";

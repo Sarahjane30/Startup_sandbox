@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Startup Sandbox — Simulation Engine</title>
+  <title>Startup Sandbox - Founder Decision Simulator</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -23,56 +23,159 @@
         <a href="simulation.html" class="nav-link is-active">Simulate</a>
         <a href="learning.html" class="nav-link">Learn</a>
       </div>
-      <a href="learning.html" class="nav-cta">Start Learning →</a>
+      <a href="learning.html" class="nav-cta">Start Learning</a>
     </div>
   </nav>
 
   <main class="wrap">
-
-    <!-- HERO -->
     <section class="sim-hero">
-      <div class="hero-eyebrow">// STARTUP SIMULATION ENGINE</div>
-      <h1 class="hero-h1">Project Your<br/><span class="grad">Startup's Future</span></h1>
-      <p class="hero-lead">Enter your startup idea and get AI-generated 3-month, 6-month, and 1-year projections — users, revenue, retention, and failure modes.</p>
+      <div class="hero-eyebrow">// FOUNDER DECISION SIMULATOR</div>
+      <h1 class="hero-h1">Live Two Startup Years<br><span class="grad">In Twenty Minutes</span></h1>
+      <p class="hero-lead">Set founder constraints, launch a startup world, make monthly decisions, and watch cash, morale, investor interest, stress, dilution, and market pressure react.</p>
 
-      <div class="sim-input-wrap">
-        <textarea
-          id="simInput"
-          class="sim-textarea"
-          placeholder="Describe your startup: who is the customer, what problem do you solve, how do you make money, and what's your launch plan?"
-        ></textarea>
+      <div class="sim-input-wrap founder-setup">
+        <div class="setup-grid">
+          <label class="field-card">
+            <span>Money in hand</span>
+            <input id="money" type="number" min="0" placeholder="25000" value="25000">
+          </label>
+          <label class="field-card">
+            <span>Monthly burn capacity</span>
+            <input id="monthlyBurn" type="number" min="0" placeholder="4000" value="4000">
+          </label>
+          <label class="field-card">
+            <span>Team size</span>
+            <input id="teamSize" type="number" min="1" max="20" placeholder="2" value="2">
+          </label>
+          <label class="field-card">
+            <span>Technical cofounder</span>
+            <select id="technicalCofounder">
+              <option>Yes</option>
+              <option>No</option>
+            </select>
+          </label>
+          <label class="field-card">
+            <span>Founder type</span>
+            <select id="founderType">
+              <option>College student</option>
+              <option>Working professional</option>
+              <option>Full-time founder</option>
+              <option>Repeat founder</option>
+            </select>
+          </label>
+          <label class="field-card">
+            <span>Country</span>
+            <input id="country" placeholder="India" value="India">
+          </label>
+          <label class="field-card">
+            <span>Risk tolerance</span>
+            <select id="riskTolerance">
+              <option>Medium</option>
+              <option>Low</option>
+              <option>High</option>
+            </select>
+          </label>
+          <label class="field-card">
+            <span>Startup stage</span>
+            <select id="startupStage">
+              <option>Idea</option>
+              <option>MVP built</option>
+              <option>Launched pre-revenue</option>
+              <option>Early revenue</option>
+              <option>Scaling</option>
+            </select>
+          </label>
+          <label class="field-card">
+            <span>Existing audience</span>
+            <select id="audience">
+              <option>No audience</option>
+              <option>Small niche audience</option>
+              <option>Large audience</option>
+            </select>
+          </label>
+          <label class="field-card">
+            <span>Industry experience</span>
+            <select id="industryExperience">
+              <option>Medium</option>
+              <option>Low</option>
+              <option>High</option>
+            </select>
+          </label>
+          <label class="field-card">
+            <span>Time commitment</span>
+            <select id="timeCommitment">
+              <option>Part-time</option>
+              <option>Full-time</option>
+              <option>Nights and weekends</option>
+            </select>
+          </label>
+          <label class="field-card span-2">
+            <span>Founder personality</span>
+            <select id="personality">
+              <option>Visionary founder</option>
+              <option>Technical founder</option>
+              <option>Marketer founder</option>
+              <option>Perfectionist founder</option>
+              <option>Impulsive founder</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="startup-setup">
+          <textarea id="idea" class="sim-textarea" placeholder="Startup idea: who is the customer, what pain do they have, what do you sell, and why now?"></textarea>
+          <div class="setup-grid compact">
+            <label class="field-card"><span>Industry</span><input id="industry" placeholder="Fintech, education, healthcare"></label>
+            <label class="field-card"><span>Customer</span><select id="customerType"><option>B2B</option><option>B2C</option><option>B2B2C</option><option>Marketplace</option></select></label>
+            <label class="field-card"><span>Model</span><select id="businessModel"><option>Subscription</option><option>Marketplace</option><option>Usage-based</option><option>Services + software</option><option>Advertising</option></select></label>
+            <label class="field-card"><span>AI dependency</span><select id="aiDependency"><option>Medium</option><option>Low</option><option>High</option><option>Core product is AI</option></select></label>
+            <label class="field-card"><span>Product type</span><select id="productType"><option>Software</option><option>Hardware</option><option>Hardware + software</option><option>Services</option></select></label>
+            <label class="field-card"><span>Revenue model</span><input id="revenueModel" placeholder="$29/month SaaS, take rate, etc."></label>
+          </div>
+        </div>
+
         <div class="sim-input-row">
-          <select id="simStage" style="flex:1; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); padding: 14px 16px; font-family: var(--font-body); font-size: 0.95rem; outline: none; cursor: pointer;">
-            <option value="idea">Stage: Just an Idea</option>
-            <option value="mvp">Stage: MVP Built</option>
-            <option value="launched">Stage: Launched (Pre-revenue)</option>
-            <option value="early-revenue">Stage: Early Revenue</option>
-            <option value="scaling">Stage: Scaling</option>
-          </select>
-          <button id="simBtn" class="sim-btn">RUN SIMULATION →</button>
+          <button id="simBtn" class="sim-btn">START DECISION SIM</button>
         </div>
         <div id="simStatus" class="status-bar"></div>
       </div>
     </section>
 
-    <!-- RESULTS -->
     <section id="simResults" style="display:none;">
-
-      <!-- Summary banner -->
       <div id="simSummaryBanner" class="card span-3" style="margin-bottom: 24px; border-color: rgba(79,142,255,0.3); background: linear-gradient(145deg, rgba(79,142,255,0.08), var(--bg-card));">
-        <div class="card-label primary-label">📊 SIMULATION SUMMARY</div>
+        <div class="card-label primary-label">SIMULATION WORLD</div>
         <p id="simSummaryText" class="card-text" style="font-size: 1.05rem;"></p>
+        <div id="startupPattern" class="pattern-match"></div>
       </div>
 
-      <!-- Top metrics -->
-      <div class="sim-grid" id="simMetricsGrid" style="margin-bottom: 32px;"></div>
+      <div class="founder-dashboard">
+        <div class="sim-grid" id="simMetricsGrid"></div>
+        <div class="sim-grid dashboard-secondary">
+          <aside class="sim-card">
+            <div class="sim-card-title">Startup health</div>
+            <div id="healthMeters"></div>
+          </aside>
+          <aside class="sim-card">
+            <div class="sim-card-title">Runway graph</div>
+            <div style="position:relative; height:190px;">
+              <canvas id="runwayChart"></canvas>
+            </div>
+          </aside>
+        </div>
+      </div>
 
-      <!-- Timeline -->
-      <div class="section-eyebrow" style="margin-bottom: 24px;">// GROWTH TIMELINE</div>
-      <div class="timeline" id="simTimeline"></div>
+      <div class="sim-grid decision-layout">
+        <section class="sim-card span-2">
+          <div id="decisionRound"></div>
+        </section>
+        <aside class="sim-card timeline-card">
+          <div class="sim-card-title">Monthly timeline</div>
+          <div id="monthlyTimeline"></div>
+        </aside>
+      </div>
 
-      <!-- Charts -->
-      <div class="section-eyebrow" style="margin-top: 48px; margin-bottom: 24px;">// PROJECTIONS</div>
+      <div id="coachPanel" style="margin-bottom: 32px;"></div>
+
+      <div class="section-eyebrow" style="margin-top: 48px; margin-bottom: 24px;">// LIVE CONSEQUENCES</div>
       <div class="sim-grid">
         <div class="sim-card">
           <div class="sim-card-title">USER GROWTH</div>
@@ -86,50 +189,37 @@
             <canvas id="revenueChart"></canvas>
           </div>
         </div>
-      </div>
-
-      <!-- Failure mode + investor reaction -->
-      <div class="dash-grid" style="margin-top: 20px; margin-bottom: 80px;">
-        <article class="card">
-          <div class="card-label">💀 FAILURE TIMELINE</div>
-          <div id="simFailure" class="card-text"></div>
-        </article>
-        <article class="card">
-          <div class="card-label">💼 INVESTOR REACTION</div>
-          <div id="simInvestor" class="card-text"></div>
-        </article>
-        <article class="card">
-          <div class="card-label">👤 USER REACTION</div>
-          <div id="simUser" class="card-text"></div>
-        </article>
-        <article class="card span-3 insight-card">
-          <div class="card-label primary-label">🎯 KEY STRATEGIC MOVES</div>
-          <div id="simMoves" class="card-text"></div>
+        <div class="sim-card">
+          <div class="sim-card-title">DILUTION</div>
+          <div style="position:relative; height:200px;">
+            <canvas id="equityChart"></canvas>
+          </div>
+        </div>
+        <article class="sim-card">
+          <div class="sim-card-title">FOUNDER LOG</div>
+          <div id="founderLog"></div>
         </article>
       </div>
-
     </section>
 
-    <!-- CTA -->
     <section class="cta-section" id="simCta">
       <div class="cta-cards">
         <a href="index.html" class="cta-card">
-          <div class="cta-icon">🔍</div>
+          <div class="cta-icon">?</div>
           <div class="cta-label">ANALYZE</div>
           <div class="cta-title">Analyze Any Company</div>
           <p class="cta-desc">Get full business intelligence on any existing product or brand.</p>
-          <div class="cta-arrow">→</div>
+          <div class="cta-arrow">-&gt;</div>
         </a>
         <a href="learning.html" class="cta-card">
-          <div class="cta-icon">🎮</div>
+          <div class="cta-icon">+</div>
           <div class="cta-label">LEARNING PLATFORM</div>
           <div class="cta-title">Learn Like Duolingo</div>
           <p class="cta-desc">Gamified business lessons on validation, MVP, pricing, and growth.</p>
-          <div class="cta-arrow">→</div>
+          <div class="cta-arrow">-&gt;</div>
         </a>
       </div>
     </section>
-
   </main>
 
   <footer class="footer">
@@ -140,7 +230,7 @@
         <a href="simulation.html">Simulate</a>
         <a href="learning.html">Learn</a>
       </div>
-      <div class="footer-copy">Powered by Gemini AI</div>
+      
     </div>
   </footer>
 
