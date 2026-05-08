@@ -59,17 +59,30 @@
     <section id="simResults" style="display:none;">
 
       <!-- Summary banner -->
-      <div id="simSummaryBanner" class="card span-3" style="margin-bottom: 24px; border-color: rgba(79,142,255,0.3); background: linear-gradient(145deg, rgba(79,142,255,0.08), var(--bg-card));">
+      <div id="simSummaryBanner" class="card span-3" style="margin-bottom: 16px; border-color: rgba(79,142,255,0.3); background: linear-gradient(145deg, rgba(79,142,255,0.08), var(--bg-card));">
         <div class="card-label primary-label">📊 SIMULATION SUMMARY</div>
         <p id="simSummaryText" class="card-text" style="font-size: 1.05rem;"></p>
+        <p id="simPatternMatch" class="card-text" style="font-size: 0.88rem; color: var(--accent); margin-top: 10px; font-style: italic; display: none;"></p>
       </div>
 
       <!-- Top metrics -->
-      <div class="sim-grid" id="simMetricsGrid" style="margin-bottom: 32px;"></div>
+      <div class="sim-grid" id="simMetricsGrid" style="margin-bottom: 24px;"></div>
+
+      <!-- Live Dashboard (visible stats) -->
+      <div id="simVisibleStats" style="display:none;"></div>
 
       <!-- Timeline -->
       <div class="section-eyebrow" style="margin-bottom: 24px;">// GROWTH TIMELINE</div>
       <div class="timeline" id="simTimeline"></div>
+
+      <!-- Decision Choices (interactive) -->
+      <div id="simChoices" style="display:none; margin-top: 32px;"></div>
+
+      <!-- Founder Lesson -->
+      <div id="simLesson" style="display:none; margin-top: 32px;"></div>
+
+      <!-- Journey History -->
+      <div id="simHistory" style="display:none; margin-top: 32px;"></div>
 
       <!-- Charts -->
       <div class="section-eyebrow" style="margin-top: 48px; margin-bottom: 24px;">// PROJECTIONS</div>
