@@ -571,6 +571,39 @@ function startupSimSchema() {
         },
         required: ["labels", "users", "revenue", "runway", "health"]
       },
+      topMetrics: {
+        type: Type.OBJECT,
+        properties: {
+          survivabilityScore: { type: Type.INTEGER },
+          fundingLikelihood: { type: Type.INTEGER },
+          marketFitScore: { type: Type.INTEGER },
+          burnRunway: { type: Type.STRING }
+        }
+      },
+      timeline: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.OBJECT,
+          properties: {
+            period: { type: Type.STRING },
+            title: { type: Type.STRING },
+            narrative: { type: Type.STRING },
+            metrics: {
+              type: Type.OBJECT,
+              properties: {
+                users: { type: Type.STRING },
+                revenue: { type: Type.STRING },
+                retention: { type: Type.STRING },
+                keyEvent: { type: Type.STRING }
+              }
+            }
+          }
+        }
+      },
+      failureTimeline: { type: Type.STRING },
+      investorReaction: { type: Type.STRING },
+      userReaction: { type: Type.STRING },
+      strategicMoves: { type: Type.STRING },
       history: {
         type: Type.ARRAY,
         items: {
@@ -630,6 +663,43 @@ function compactSimState(state) {
     lesson: state?.lesson || {},
     chartData: state?.chartData || {},
     history: Array.isArray(state?.history) ? state.history.slice(-8) : []
+  };
+}
+
+function enrichSimulationData(sim) {
+  const visible = sim.visible || {};
+  const lesson = sim.lesson || {};
+  const round = sim.round || {};
+
+  const topMetrics = sim.topMetrics || {
+    survivabilityScore: sim.topMetrics?.survivabilityScore ?? Math.round((simNumber(visible.healthScore) + simNumber(visible.retention) + simNumber(visible.growth)) / 3),
+    fundingLikelihood: sim.topMetrics?.fundingLikelihood ?? simNumber(visible.investorInterest || visible.investorConfidence),
+    marketFitScore: sim.topMetrics?.marketFitScore ?? simNumber(visible.growth || visible.retention),
+    burnRunway: sim.topMetrics?.burnRunway ?? (typeof visible.runwayMonths === "number" ? `${visible.runwayMonths} months` : "--")
+  };
+
+  const timeline = sim.timeline || (round ? [
+    {
+      period: `Month ${round.month || 1}`,
+      title: round.title || round.stage || "Current phase",
+      narrative: round.narrative || round.randomEvent || "",
+      metrics: {
+        users: visible.users != null ? `${Math.round(visible.users).toLocaleString("en-US")} users` : "--",
+        revenue: visible.revenue != null ? `$${Math.round(visible.revenue).toLocaleString("en-US")}` : "--",
+        retention: visible.retention != null ? `${visible.retention}%` : "--",
+        keyEvent: round.randomEvent || ""
+      }
+    }
+  ] : []);
+
+  return {
+    ...sim,
+    topMetrics,
+    timeline,
+    failureTimeline: sim.failureTimeline || sim.patternMatch || "",
+    investorReaction: sim.investorReaction || (typeof visible.investorInterest === "number" ? `Investor interest is around ${visible.investorInterest}/100.` : ""),
+    userReaction: sim.userReaction || (typeof visible.retention === "number" ? `Early user retention is around ${visible.retention}%.` : ""),
+    strategicMoves: sim.strategicMoves || [lesson.beginnerChoice, lesson.smartChoice].filter(Boolean).join("\n")
   };
 }
 
@@ -795,9 +865,9 @@ function fallbackInitialSimulation(founder, startup) {
   ];
   const patternIndex = (safeText(startup?.industry).length + safeText(founder?.founderType).length) % patterns.length;
 
-  return {
-    summary: buildStartupNarrative(founder, startup, visible),
-    patternMatch: patterns[patternIndex],
+  return enrichSimulationData({
+    summary: `You are starting with ${moneyText(cash)} in cash and about ${runwayMonths} months of runway. The simulation will reward evidence from customers over theatrical momentum.`,
+    patternMatch: "Your path currently resembles early Airbnb-style manual learning, with a possible Quibi-style risk if you overbuild before proving demand.",
     founder,
     startup,
     visible,
@@ -818,10 +888,8 @@ function fallbackInitialSimulation(founder, startup) {
       why: "At this stage, the scarcest resource is not code or pitch polish. It is verified demand before runway disappears."
     },
     chartData: fallbackChartPoint("Month 1", visible),
-    history: [],
-    _fallback: true,
-    _fallbackNote: "Running with fallback simulation. The AI model was temporarily unavailable."
-  };
+    history: []
+  });
 }
 
 function moneyText(value) {
@@ -945,12 +1013,12 @@ Return only JSON in the required schema.`;
 
   try {
     const result = await generateFounderSimulation(prompt);
-    return {
+    return enrichSimulationData({
       ...result,
       founder,
       startup,
       history: Array.isArray(result.history) ? result.history : []
-    };
+    });
   } catch (err) {
     console.error("Simulation LLM Error:", err?.message || err);
     console.log("Falling back to deterministic simulation...");
@@ -990,14 +1058,14 @@ Return only JSON in the required schema.`;
 
   try {
     const result = await generateFounderSimulation(prompt);
-    return {
+    return enrichSimulationData({
       ...result,
       founder: compactState.founder,
       startup: compactState.startup
-    };
+    });
   } catch (err) {
     console.error("Decision LLM Error:", err);
-    return fallbackAdvanceSimulation(state, choiceId);
+    return enrichSimulationData(fallbackAdvanceSimulation(state, choiceId));
   }
 }
 async function analyze(company) {

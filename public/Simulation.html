@@ -141,41 +141,33 @@
     </section>
 
     <section id="simResults" style="display:none;">
-      <div id="simSummaryBanner" class="card span-3" style="margin-bottom: 24px; border-color: rgba(79,142,255,0.3); background: linear-gradient(145deg, rgba(79,142,255,0.08), var(--bg-card));">
-        <div class="card-label primary-label">SIMULATION WORLD</div>
+
+      <!-- Summary banner -->
+      <div id="simSummaryBanner" class="card span-3" style="margin-bottom: 16px; border-color: rgba(79,142,255,0.3); background: linear-gradient(145deg, rgba(79,142,255,0.08), var(--bg-card));">
+        <div class="card-label primary-label">📊 SIMULATION SUMMARY</div>
         <p id="simSummaryText" class="card-text" style="font-size: 1.05rem;"></p>
-        <div id="startupPattern" class="pattern-match"></div>
+        <p id="simPatternMatch" class="card-text" style="font-size: 0.88rem; color: var(--accent); margin-top: 10px; font-style: italic; display: none;"></p>
       </div>
 
-      <div class="founder-dashboard">
-        <div class="sim-grid" id="simMetricsGrid"></div>
-        <div class="sim-grid dashboard-secondary">
-          <aside class="sim-card">
-            <div class="sim-card-title">Startup health</div>
-            <div id="healthMeters"></div>
-          </aside>
-          <aside class="sim-card">
-            <div class="sim-card-title">Runway graph</div>
-            <div style="position:relative; height:190px;">
-              <canvas id="runwayChart"></canvas>
-            </div>
-          </aside>
-        </div>
-      </div>
+      <!-- Top metrics -->
+      <div class="sim-grid" id="simMetricsGrid" style="margin-bottom: 24px;"></div>
 
-      <div class="sim-grid decision-layout">
-        <section class="sim-card span-2">
-          <div id="decisionRound"></div>
-        </section>
-        <aside class="sim-card timeline-card">
-          <div class="sim-card-title">Monthly timeline</div>
-          <div id="monthlyTimeline"></div>
-        </aside>
-      </div>
+      <!-- Live Dashboard (visible stats) -->
+      <div id="simVisibleStats" style="display:none;"></div>
 
       <div id="coachPanel" style="margin-bottom: 32px;"></div>
 
-      <div class="section-eyebrow" style="margin-top: 48px; margin-bottom: 24px;">// LIVE CONSEQUENCES</div>
+      <!-- Decision Choices (interactive) -->
+      <div id="simChoices" style="display:none; margin-top: 32px;"></div>
+
+      <!-- Founder Lesson -->
+      <div id="simLesson" style="display:none; margin-top: 32px;"></div>
+
+      <!-- Journey History -->
+      <div id="simHistory" style="display:none; margin-top: 32px;"></div>
+
+      <!-- Charts -->
+      <div class="section-eyebrow" style="margin-top: 48px; margin-bottom: 24px;">// PROJECTIONS</div>
       <div class="sim-grid">
         <div class="sim-card">
           <div class="sim-card-title">USER GROWTH</div>
