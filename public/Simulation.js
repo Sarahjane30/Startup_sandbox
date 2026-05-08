@@ -1,4 +1,4 @@
-// =============================================
+﻿// =============================================
 //  STARTUP SANDBOX — simulation.js
 //  Interactive Founder Decision Simulator
 // =============================================
@@ -224,36 +224,72 @@ function renderCharts(data) {
     }
   };
 
-  if (usersChartInst) usersChartInst.destroy();
-  usersChartInst = new Chart($("usersChart").getContext("2d"), {
-    type: "line",
+function renderFounderLog(history = []) {
+  if (!ui.founderLog) return;
+  ui.founderLog.innerHTML = history.length
+    ? history
+        .map(
+          (entry) => `
+            <div class="log-entry">
+              <div class="log-month">Month ${entry.month || ''} — ${entry.choice || ''}</div>
+              <div class="log-text">${entry.outcome || entry.summary || entry.note || ''}</div>
+            </div>
+          `
+        )
+        .join('')
+    : '<div class="muted-init">Your founder log will appear here as you make decisions.</div>';
+}
+
+function renderCharts(chartData = {}) {
+  if (typeof Chart !== 'function') return;
+
+  const chartConfig = (label, data, color = 'rgba(79,142,255,0.9)') => ({
+    type: 'line',
     data: {
-      labels,
-      datasets: [{
-        data: cd.users || [],
-        borderColor: "rgba(79,142,255,1)",
-        backgroundColor: "rgba(79,142,255,0.1)",
-        fill: true, tension: 0.4, pointRadius: 4,
-        pointBackgroundColor: "rgba(79,142,255,1)",
-      }]
+      labels: chartData.labels || [],
+      datasets: [
+        {
+          label,
+          data: data || [],
+          fill: false,
+          borderColor: color,
+          backgroundColor: color,
+          tension: 0.35,
+          pointRadius: 3,
+          pointBackgroundColor: color,
+        }
+      ]
     },
-    options: { ...chartDefaults }
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#fff' }, grid: { display: false } },
+        y: { ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.08)' } }
+      }
+    }
   });
 
-  if (revenueChartInst) revenueChartInst.destroy();
-  revenueChartInst = new Chart($("revenueChart").getContext("2d"), {
-    type: "line",
-    data: {
-      labels,
-      datasets: [{
-        data: cd.revenue || [],
-        borderColor: "rgba(167,139,250,1)",
-        backgroundColor: "rgba(167,139,250,0.1)",
-        fill: true, tension: 0.4, pointRadius: 4,
-        pointBackgroundColor: "rgba(167,139,250,1)",
-      }]
-    },
-    options: { ...chartDefaults }
+  const chartMap = [
+    { id: 'runwayChart', label: 'Runway', data: chartData.runway, color: 'rgba(79,142,255,1)' },
+    { id: 'usersChart', label: 'Users', data: chartData.users, color: 'rgba(34,197,94,1)' },
+    { id: 'revenueChart', label: 'Revenue', data: chartData.revenue, color: 'rgba(249,115,22,1)' },
+    { id: 'equityChart', label: 'Equity Left', data: chartData.equity || (Array.isArray(chartData.dilution) ? chartData.dilution.map((v) => 100 - v) : []), color: 'rgba(234,179,8,1)' },
+  ];
+
+  chartMap.forEach(({ id, label, data, color }) => {
+    const canvas = $(id);
+    if (!canvas) return;
+    if (chartInstances[id]) {
+      chartInstances[id].destroy();
+      chartInstances[id] = null;
+    }
+    try {
+      chartInstances[id] = new Chart(canvas.getContext('2d'), chartConfig(label, data, color));
+    } catch (error) {
+      console.warn('Chart render failed for', id, error);
+    }
   });
 }
 
@@ -276,6 +312,14 @@ function renderInsightCards(data) {
           .map(s => `<p style="margin-bottom:10px;">→ ${s.trim().replace(/^\d+\.\s*/, "")}</p>`).join("")
       : "";
   }
+
+  renderMetrics(state.visible || {});
+  renderHealthMeters(state.visible || {});
+  renderDecisionRound(state.round || {});
+  renderTimeline(state.chartData || {});
+  renderCoachPanel(state.lesson || {}, state.round || {});
+  renderFounderLog(state.history || []);
+  renderCharts(state.chartData || {});
 }
 
 // ─── Render hidden metrics bar ───────────────────────────────────
@@ -379,16 +423,14 @@ async function runSimulation() {
   const stage = $("simStage")?.value || "idea";
   if (!idea) return ($("simStatus").textContent = "Enter your startup idea first.");
 
-  $("simStatus").textContent = "⏳ Running simulation with Gemini AI...";
-  $("simBtn").disabled = true;
-  $("simBtn").textContent = "SIMULATING...";
-  $("simResults").style.display = "none";
+  const founder = collectFounder();
+  const startup = collectStartup();
 
   try {
-    const res = await fetch("/api/simulate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idea, stage })
+    const response = await fetch('/api/simulate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ founder, startup }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data?.error || `Simulation failed: ${res.status}`);
@@ -398,15 +440,22 @@ async function runSimulation() {
     $("simStatus").textContent = "✓ Simulation started — Make your first decision below!";
     $("simResults").scrollIntoView({ behavior: "smooth", block: "start" });
   } catch (err) {
-    $("simStatus").textContent = `Error: ${err.message}`;
+    setStatus(`Error: ${err.message}`);
     console.error(err);
   } finally {
-    $("simBtn").disabled = false;
-    $("simBtn").textContent = "RUN SIMULATION →";
+    if (ui.simBtn) {
+      ui.simBtn.disabled = false;
+      ui.simBtn.textContent = 'START DECISION SIM';
+    }
   }
 }
 
-$("simBtn")?.addEventListener("click", runSimulation);
-$("simInput")?.addEventListener("keydown", e => {
-  if (e.key === "Enter" && e.ctrlKey) runSimulation();
+if (ui.simBtn) {
+  ui.simBtn.addEventListener('click', startSimulation);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  if (currentSimState) {
+    renderSimulation(currentSimState);
+  }
 });
