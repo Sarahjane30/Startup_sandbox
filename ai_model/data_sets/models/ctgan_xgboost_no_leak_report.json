@@ -1,0 +1,306 @@
+{
+  "dataset": "C:\\Users\\sarah\\Documents\\Codex\\2026-05-02\\Startup_sandbox\\ai_model\\data_sets\\data_sets\\final_training_data_v2.csv",
+  "rows": 7505,
+  "columns": [
+    "sector",
+    "funding_total_usd",
+    "company_age",
+    "sector_group",
+    "funding_log1p"
+  ],
+  "target_distribution": {
+    "1": 7096,
+    "0": 409
+  },
+  "drop_risk_features": true,
+  "train_distribution": {
+    "1": 4541,
+    "0": 262
+  },
+  "imbalance_ratio": 17.33206106870229,
+  "balance": {
+    "method": "ctgan",
+    "minority_class": 0,
+    "original_minority_count": 262,
+    "synthetic_rows": 3143,
+    "target_minority_ratio": 0.75,
+    "gan_epochs": 120,
+    "discrete_columns": [
+      "sector",
+      "sector_group"
+    ],
+    "note": "CTGAN was trained only on the training split's minority class; validation and test data were untouched."
+  },
+  "selected_model": "deeper_interactions",
+  "validation": {
+    "threshold": 0.53,
+    "accuracy": 0.9908409658617818,
+    "balanced_accuracy": 0.9298889490790899,
+    "macro_f1": 0.9528712136616759,
+    "roc_auc": 0.9983748645720476,
+    "confusion_matrix": [
+      [
+        56,
+        9
+      ],
+      [
+        2,
+        1134
+      ]
+    ],
+    "class_metrics": {
+      "failure_0": {
+        "precision": 0.9655172413793104,
+        "recall": 0.8615384615384616,
+        "f1": 0.9105691056910569,
+        "support": 65
+      },
+      "success_1": {
+        "precision": 0.9921259842519685,
+        "recall": 0.9982394366197183,
+        "f1": 0.9951733216322949,
+        "support": 1136
+      }
+    },
+    "classification_report": "              precision    recall  f1-score   support\n\n           0       0.97      0.86      0.91        65\n           1       0.99      1.00      1.00      1136\n\n    accuracy                           0.99      1201\n   macro avg       0.98      0.93      0.95      1201\nweighted avg       0.99      0.99      0.99      1201\n"
+  },
+  "test": {
+    "threshold": 0.53,
+    "accuracy": 0.9953364423717521,
+    "balanced_accuracy": 0.9630622733288644,
+    "macro_f1": 0.9767563274687692,
+    "roc_auc": 0.9994413791918046,
+    "confusion_matrix": [
+      [
+        76,
+        6
+      ],
+      [
+        1,
+        1418
+      ]
+    ],
+    "class_metrics": {
+      "failure_0": {
+        "precision": 0.987012987012987,
+        "recall": 0.926829268292683,
+        "f1": 0.9559748427672956,
+        "support": 82
+      },
+      "success_1": {
+        "precision": 0.9957865168539326,
+        "recall": 0.9992952783650458,
+        "f1": 0.9975378121702427,
+        "support": 1419
+      }
+    },
+    "classification_report": "              precision    recall  f1-score   support\n\n           0       0.99      0.93      0.96        82\n           1       1.00      1.00      1.00      1419\n\n    accuracy                           1.00      1501\n   macro avg       0.99      0.96      0.98      1501\nweighted avg       1.00      1.00      1.00      1501\n"
+  },
+  "candidate_models": [
+    {
+      "name": "balanced_generalist",
+      "threshold": 0.61,
+      "selection_score": 0.942143441883861,
+      "threshold_search": {
+        "macro_f1": 0.9489790138491603,
+        "balanced_accuracy": 0.9294488082340195
+      },
+      "validation": {
+        "threshold": 0.61,
+        "accuracy": 0.9900083263946711,
+        "balanced_accuracy": 0.9294488082340195,
+        "macro_f1": 0.9489790138491603,
+        "roc_auc": 0.9988082340195016,
+        "confusion_matrix": [
+          [
+            56,
+            9
+          ],
+          [
+            3,
+            1133
+          ]
+        ],
+        "class_metrics": {
+          "failure_0": {
+            "precision": 0.9491525423728814,
+            "recall": 0.8615384615384616,
+            "f1": 0.9032258064516129,
+            "support": 65
+          },
+          "success_1": {
+            "precision": 0.9921190893169878,
+            "recall": 0.9973591549295775,
+            "f1": 0.9947322212467077,
+            "support": 1136
+          }
+        },
+        "classification_report": "              precision    recall  f1-score   support\n\n           0       0.95      0.86      0.90        65\n           1       0.99      1.00      0.99      1136\n\n    accuracy                           0.99      1201\n   macro avg       0.97      0.93      0.95      1201\nweighted avg       0.99      0.99      0.99      1201\n"
+      }
+    },
+    {
+      "name": "high_recall_failure",
+      "threshold": 0.3,
+      "selection_score": 0.9418101241896615,
+      "threshold_search": {
+        "macro_f1": 0.9521342313977124,
+        "balanced_accuracy": 0.9226367822318526
+      },
+      "validation": {
+        "threshold": 0.3,
+        "accuracy": 0.9908409658617818,
+        "balanced_accuracy": 0.9226367822318526,
+        "macro_f1": 0.9521342313977124,
+        "roc_auc": 0.9987066630552547,
+        "confusion_matrix": [
+          [
+            55,
+            10
+          ],
+          [
+            1,
+            1135
+          ]
+        ],
+        "class_metrics": {
+          "failure_0": {
+            "precision": 0.9821428571428571,
+            "recall": 0.8461538461538461,
+            "f1": 0.9090909090909091,
+            "support": 65
+          },
+          "success_1": {
+            "precision": 0.9912663755458515,
+            "recall": 0.9991197183098591,
+            "f1": 0.9951775537045155,
+            "support": 1136
+          }
+        },
+        "classification_report": "              precision    recall  f1-score   support\n\n           0       0.98      0.85      0.91        65\n           1       0.99      1.00      1.00      1136\n\n    accuracy                           0.99      1201\n   macro avg       0.99      0.92      0.95      1201\nweighted avg       0.99      0.99      0.99      1201\n"
+      }
+    },
+    {
+      "name": "deeper_interactions",
+      "threshold": 0.53,
+      "selection_score": 0.9448274210577708,
+      "threshold_search": {
+        "macro_f1": 0.9528712136616759,
+        "balanced_accuracy": 0.9298889490790899
+      },
+      "validation": {
+        "threshold": 0.53,
+        "accuracy": 0.9908409658617818,
+        "balanced_accuracy": 0.9298889490790899,
+        "macro_f1": 0.9528712136616759,
+        "roc_auc": 0.9983748645720476,
+        "confusion_matrix": [
+          [
+            56,
+            9
+          ],
+          [
+            2,
+            1134
+          ]
+        ],
+        "class_metrics": {
+          "failure_0": {
+            "precision": 0.9655172413793104,
+            "recall": 0.8615384615384616,
+            "f1": 0.9105691056910569,
+            "support": 65
+          },
+          "success_1": {
+            "precision": 0.9921259842519685,
+            "recall": 0.9982394366197183,
+            "f1": 0.9951733216322949,
+            "support": 1136
+          }
+        },
+        "classification_report": "              precision    recall  f1-score   support\n\n           0       0.97      0.86      0.91        65\n           1       0.99      1.00      1.00      1136\n\n    accuracy                           0.99      1201\n   macro avg       0.98      0.93      0.95      1201\nweighted avg       0.99      0.99      0.99      1201\n"
+      }
+    }
+  ],
+  "top_features": [
+    {
+      "feature": "funding_total_usd",
+      "importance": 0.21110767126083374
+    },
+    {
+      "feature": "sector_Finance and Insurance",
+      "importance": 0.09206782281398773
+    },
+    {
+      "feature": "sector_Information",
+      "importance": 0.0843098983168602
+    },
+    {
+      "feature": "sector_infrequent_sklearn",
+      "importance": 0.07623782753944397
+    },
+    {
+      "feature": "company_age",
+      "importance": 0.07381033897399902
+    },
+    {
+      "feature": "sector_Retail Trade",
+      "importance": 0.0651262179017067
+    },
+    {
+      "feature": "funding_log1p",
+      "importance": 0.06451823562383652
+    },
+    {
+      "feature": "sector_Biotechnology|Health Care",
+      "importance": 0.06013215705752373
+    },
+    {
+      "feature": "sector_Biotechnology",
+      "importance": 0.05668162554502487
+    },
+    {
+      "feature": "sector_Accommodation and Food Services",
+      "importance": 0.05170930176973343
+    },
+    {
+      "feature": "sector_Clean Technology",
+      "importance": 0.046167608350515366
+    },
+    {
+      "feature": "sector_Software",
+      "importance": 0.03637281060218811
+    },
+    {
+      "feature": "sector_Health Care",
+      "importance": 0.02740451879799366
+    },
+    {
+      "feature": "sector_Manufacturing",
+      "importance": 0.025505078956484795
+    },
+    {
+      "feature": "sector_group_health_care",
+      "importance": 0.008571406826376915
+    },
+    {
+      "feature": "sector_group_manufacturing",
+      "importance": 0.007579191122204065
+    },
+    {
+      "feature": "sector_group_finance",
+      "importance": 0.006621134467422962
+    },
+    {
+      "feature": "sector_group_retail",
+      "importance": 0.004247287753969431
+    },
+    {
+      "feature": "sector_group_information",
+      "importance": 0.0018299530493095517
+    },
+    {
+      "feature": "sector_group_consulting",
+      "importance": 0.0
+    }
+  ]
+}

@@ -28,115 +28,152 @@
   </nav>
 
   <main class="wrap">
-    <section class="sim-hero">
-      <div class="hero-eyebrow">// FOUNDER DECISION SIMULATOR</div>
-      <h1 class="hero-h1">Live Two Startup Years<br><span class="grad">In Twenty Minutes</span></h1>
-      <p class="hero-lead">Set founder constraints, launch a startup world, make monthly decisions, and watch cash, morale, investor interest, stress, dilution, and market pressure react.</p>
-
-      <div class="sim-input-wrap founder-setup">
-        <div class="setup-grid">
-          <label class="field-card">
-            <span>Money in hand</span>
-            <input id="money" type="number" min="0" placeholder="25000" value="25000">
-          </label>
-          <label class="field-card">
-            <span>Monthly burn capacity</span>
-            <input id="monthlyBurn" type="number" min="0" placeholder="4000" value="4000">
-          </label>
-          <label class="field-card">
-            <span>Team size</span>
-            <input id="teamSize" type="number" min="1" max="20" placeholder="2" value="2">
-          </label>
-          <label class="field-card">
-            <span>Technical cofounder</span>
-            <select id="technicalCofounder">
-              <option>Yes</option>
-              <option>No</option>
-            </select>
-          </label>
-          <label class="field-card">
-            <span>Founder type</span>
-            <select id="founderType">
-              <option>College student</option>
-              <option>Working professional</option>
-              <option>Full-time founder</option>
-              <option>Repeat founder</option>
-            </select>
-          </label>
-          <label class="field-card">
-            <span>Country</span>
-            <input id="country" placeholder="India" value="India">
-          </label>
-          <label class="field-card">
-            <span>Risk tolerance</span>
-            <select id="riskTolerance">
-              <option>Medium</option>
-              <option>Low</option>
-              <option>High</option>
-            </select>
-          </label>
-          <label class="field-card">
-            <span>Startup stage</span>
-            <select id="startupStage">
-              <option>Idea</option>
-              <option>MVP built</option>
-              <option>Launched pre-revenue</option>
-              <option>Early revenue</option>
-              <option>Scaling</option>
-            </select>
-          </label>
-          <label class="field-card">
-            <span>Existing audience</span>
-            <select id="audience">
-              <option>No audience</option>
-              <option>Small niche audience</option>
-              <option>Large audience</option>
-            </select>
-          </label>
-          <label class="field-card">
-            <span>Industry experience</span>
-            <select id="industryExperience">
-              <option>Medium</option>
-              <option>Low</option>
-              <option>High</option>
-            </select>
-          </label>
-          <label class="field-card">
-            <span>Time commitment</span>
-            <select id="timeCommitment">
-              <option>Part-time</option>
-              <option>Full-time</option>
-              <option>Nights and weekends</option>
-            </select>
-          </label>
-          <label class="field-card span-2">
-            <span>Founder personality</span>
-            <select id="personality">
-              <option>Visionary founder</option>
-              <option>Technical founder</option>
-              <option>Marketer founder</option>
-              <option>Perfectionist founder</option>
-              <option>Impulsive founder</option>
-            </select>
-          </label>
+    <section class="sim-page">
+      <div class="sim-intro">
+        <div>
+          <div class="hero-eyebrow">// FOUNDER DECISION SIMULATOR</div>
+          <h1 class="sim-title">Build the startup. Survive the decisions.</h1>
+          <p class="sim-lead">Tune your constraints, describe the company, then run a monthly decision simulation with cash, runway, morale, stress, dilution, and market pressure reacting as you move.</p>
         </div>
+        <div class="sim-preview">
+          <div class="preview-label">First run</div>
+          <div class="preview-value">Up to 24 months</div>
+          <div class="preview-row"><span>Decision cadence</span><strong>Monthly</strong></div>
+          <div class="preview-row"><span>Outputs</span><strong>Metrics + coach notes</strong></div>
+        </div>
+      </div>
 
-        <div class="startup-setup">
-          <textarea id="idea" class="sim-textarea" placeholder="Startup idea: who is the customer, what pain do they have, what do you sell, and why now?"></textarea>
-          <div class="setup-grid compact">
-            <label class="field-card"><span>Industry</span><input id="industry" placeholder="Fintech, education, healthcare"></label>
-            <label class="field-card"><span>Customer</span><select id="customerType"><option>B2B</option><option>B2C</option><option>B2B2C</option><option>Marketplace</option></select></label>
-            <label class="field-card"><span>Model</span><select id="businessModel"><option>Subscription</option><option>Marketplace</option><option>Usage-based</option><option>Services + software</option><option>Advertising</option></select></label>
-            <label class="field-card"><span>AI dependency</span><select id="aiDependency"><option>Medium</option><option>Low</option><option>High</option><option>Core product is AI</option></select></label>
-            <label class="field-card"><span>Product type</span><select id="productType"><option>Software</option><option>Hardware</option><option>Hardware + software</option><option>Services</option></select></label>
-            <label class="field-card"><span>Revenue model</span><input id="revenueModel" placeholder="$29/month SaaS, take rate, etc."></label>
+      <div class="sim-builder founder-setup">
+        <section class="setup-panel">
+          <div class="setup-panel-head">
+            <div>
+              <div class="section-eyebrow">Founder constraints</div>
+              <h2>Reality settings</h2>
+            </div>
+            <p>These inputs shape runway pressure, speed, and risk appetite.</p>
           </div>
-        </div>
+          <div class="setup-grid">
+            <label class="field-card">
+              <span>Money in hand</span>
+              <input id="money" type="number" min="0" placeholder="25000" value="25000">
+            </label>
+            <label class="field-card">
+              <span>Monthly burn</span>
+              <input id="monthlyBurn" type="number" min="0" placeholder="4000" value="4000">
+            </label>
+            <label class="field-card">
+              <span>Team size</span>
+              <input id="teamSize" type="number" min="1" max="20" placeholder="2" value="2">
+            </label>
+            <label class="field-card">
+              <span>Technical cofounder</span>
+              <select id="technicalCofounder">
+                <option>Yes</option>
+                <option>No</option>
+              </select>
+            </label>
+            <label class="field-card">
+              <span>Founder type</span>
+              <select id="founderType">
+                <option>College student</option>
+                <option>Working professional</option>
+                <option>Full-time founder</option>
+                <option>Repeat founder</option>
+              </select>
+            </label>
+            <label class="field-card">
+              <span>Country</span>
+              <input id="country" placeholder="India" value="India">
+            </label>
+            <label class="field-card">
+              <span>Risk tolerance</span>
+              <select id="riskTolerance">
+                <option>Medium</option>
+                <option>Low</option>
+                <option>High</option>
+              </select>
+            </label>
+            <label class="field-card">
+              <span>Startup stage</span>
+              <select id="startupStage">
+                <option>Idea</option>
+                <option>MVP built</option>
+                <option>Launched pre-revenue</option>
+                <option>Early revenue</option>
+                <option>Scaling</option>
+              </select>
+            </label>
+            <label class="field-card">
+              <span>Existing audience</span>
+              <select id="audience">
+                <option>No audience</option>
+                <option>Small niche audience</option>
+                <option>Large audience</option>
+              </select>
+            </label>
+            <label class="field-card">
+              <span>Industry experience</span>
+              <select id="industryExperience">
+                <option>Medium</option>
+                <option>Low</option>
+                <option>High</option>
+              </select>
+            </label>
+            <label class="field-card">
+              <span>Time commitment</span>
+              <select id="timeCommitment">
+                <option>Part-time</option>
+                <option>Full-time</option>
+                <option>Nights and weekends</option>
+              </select>
+            </label>
+            <label class="field-card">
+              <span>Simulation length</span>
+              <input id="simulationMonths" type="number" min="1" max="24" placeholder="24" value="24">
+            </label>
+            <label class="field-card">
+              <span>Founder personality</span>
+              <select id="personality">
+                <option>Visionary founder</option>
+                <option>Technical founder</option>
+                <option>Marketer founder</option>
+                <option>Perfectionist founder</option>
+                <option>Impulsive founder</option>
+              </select>
+            </label>
+          </div>
+        </section>
 
-        <div class="sim-input-row">
-          <button id="simBtn" class="sim-btn">START DECISION SIM</button>
-        </div>
-        <div id="simStatus" class="status-bar"></div>
+        <section class="setup-panel setup-panel-accent">
+          <div class="setup-panel-head">
+            <div>
+              <div class="section-eyebrow">Startup setup</div>
+              <h2>Company thesis</h2>
+            </div>
+            <p>Give the simulator enough context to make the decisions feel specific.</p>
+          </div>
+          <div class="startup-setup">
+            <textarea id="idea" class="sim-textarea" placeholder="Startup idea: who is the customer, what pain do they have, what do you sell, and why now?"></textarea>
+            <div class="setup-grid compact">
+              <label class="field-card"><span>Industry</span><input id="industry" placeholder="Fintech, education, healthcare"></label>
+              <label class="field-card"><span>Customer</span><select id="customerType"><option>B2B</option><option>B2C</option><option>B2B2C</option><option>Marketplace</option></select></label>
+              <label class="field-card"><span>Model</span><select id="businessModel"><option>Subscription</option><option>Marketplace</option><option>Usage-based</option><option>Services + software</option><option>Advertising</option></select></label>
+              <label class="field-card"><span>AI dependency</span><select id="aiDependency"><option>Medium</option><option>Low</option><option>High</option><option>Core product is AI</option></select></label>
+              <label class="field-card"><span>Product type</span><select id="productType"><option>Software</option><option>Hardware</option><option>Hardware + software</option><option>Services</option></select></label>
+              <label class="field-card"><span>Revenue model</span><input id="revenueModel" placeholder="$29/month SaaS, take rate, etc."></label>
+            </div>
+          </div>
+        </section>
+
+        <section class="launch-panel">
+          <div>
+            <div class="launch-kicker">Ready when the thesis is clear</div>
+            <h2>Start the decision sim</h2>
+            <p>The next screen opens with your first operating month, a decision set, and founder coaching notes.</p>
+          </div>
+          <button id="simBtn" class="sim-btn">Start Simulation</button>
+          <div id="simStatus" class="status-bar"></div>
+        </section>
       </div>
     </section>
 
@@ -144,7 +181,7 @@
 
       <!-- Summary banner -->
       <div id="simSummaryBanner" class="card span-3" style="margin-bottom: 16px; border-color: rgba(79,142,255,0.3); background: linear-gradient(145deg, rgba(79,142,255,0.08), var(--bg-card));">
-        <div class="card-label primary-label">📊 SIMULATION SUMMARY</div>
+        <div class="card-label primary-label">SIMULATION SUMMARY</div>
         <p id="simSummaryText" class="card-text" style="font-size: 1.05rem;"></p>
         <p id="simPatternMatch" class="card-text" style="font-size: 0.88rem; color: var(--accent); margin-top: 10px; font-style: italic; display: none;"></p>
       </div>
@@ -157,6 +194,12 @@
 
       <div id="coachPanel" style="margin-bottom: 32px;"></div>
 
+      <div id="worldPanel" style="display:none; margin-bottom: 32px;"></div>
+
+      <!-- Startup timeline -->
+      <div class="section-eyebrow" style="margin-top: 32px; margin-bottom: 18px;">// CURRENT MONTH</div>
+      <div id="simTimeline" class="timeline"></div>
+
       <!-- Decision Choices (interactive) -->
       <div id="simChoices" style="display:none; margin-top: 32px;"></div>
 
@@ -167,28 +210,34 @@
       <div id="simHistory" style="display:none; margin-top: 32px;"></div>
 
       <!-- Charts -->
-      <div class="section-eyebrow" style="margin-top: 48px; margin-bottom: 24px;">// PROJECTIONS</div>
+      <div class="section-eyebrow" style="margin-top: 48px; margin-bottom: 24px;">// SIMULATION TELEMETRY</div>
       <div class="sim-grid">
         <div class="sim-card">
           <div class="sim-card-title">USER GROWTH</div>
-          <div style="position:relative; height:200px;">
+          <div style="position:relative; height:260px;">
             <canvas id="usersChart"></canvas>
           </div>
         </div>
         <div class="sim-card">
           <div class="sim-card-title">REVENUE GROWTH</div>
-          <div style="position:relative; height:200px;">
+          <div style="position:relative; height:260px;">
             <canvas id="revenueChart"></canvas>
           </div>
         </div>
         <div class="sim-card">
           <div class="sim-card-title">DILUTION</div>
-          <div style="position:relative; height:200px;">
+          <div style="position:relative; height:260px;">
             <canvas id="equityChart"></canvas>
           </div>
         </div>
+        <div class="sim-card">
+          <div class="sim-card-title">RUNWAY</div>
+          <div style="position:relative; height:260px;">
+            <canvas id="runwayChart"></canvas>
+          </div>
+        </div>
         <article class="sim-card">
-          <div class="sim-card-title">FOUNDER LOG</div>
+          <div class="sim-card-title">ENGINE STACK</div>
           <div id="founderLog"></div>
         </article>
       </div>

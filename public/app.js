@@ -1,7 +1,7 @@
 // =============================================
 //  STARTUP SANDBOX — app.js
-//  All AI outputs come from Gemini API calls.
 //  Browser code calls local backend API routes only.
+//  Idea validation is scored by the local CTGAN + XGBoost model.
 // =============================================
 
 // ─── DOM helpers ───────────────────────────────────────────────
@@ -11,6 +11,7 @@ const ui = {
   companyInput: $("companyInput"),
   runBtn: $("runBtn"),
   ideaInput: $("ideaInput"),
+  ideaSector: $("ideaSector"),
   ideaBtn: $("ideaBtn"),
   status: $("status"),
   businessModel: $("businessModel"),
@@ -52,7 +53,7 @@ function setMetric(name, value) {
   if (ui[`${name}Bar`]) ui[`${name}Bar`].style.width = `${v}%`;
 }
 
-// ─── Gemini API call ────────────────────────────────────────────
+// ─── Legacy Gemini API call placeholder ─────────────────────────
 async function callGemini(prompt) {
   throw new Error("Direct Gemini calls have moved to the backend.");
 }
@@ -149,7 +150,7 @@ function render(data, company) {
   if (ui.ratingExplain) ui.ratingExplain.innerHTML = rows.join("");
 
   if (ui.meta) {
-    ui.meta.innerHTML = `<strong>Powered by Gemini AI</strong> — Analysis for <strong>${data.company || company}</strong> generated at ${new Date().toLocaleString()}`;
+    ui.meta.innerHTML = `<strong>Open-data analysis</strong> — Analysis for <strong>${data.company || company}</strong> generated at ${new Date().toLocaleString()}`;
   }
 
   // Remove muted-init class from all card-text
@@ -157,7 +158,7 @@ function render(data, company) {
 }
 
 // ─── Idea Analysis ──────────────────────────────────────────────
-async function analyzeIdea(idea) {
+async function analyzeIdea(idea, sectorGroup = "") {
   if (false) {
   const prompt = `
 You are a Y Combinator partner, serial entrepreneur, and ruthless startup evaluator.
@@ -187,7 +188,7 @@ Return ONLY valid JSON (no markdown, no explanation) matching this exact schema:
   const res = await fetch("/api/analyze-idea", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ idea })
+    body: JSON.stringify({ idea, sector_group: sectorGroup })
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data?.error || `Idea analysis failed: ${res.status}`);
@@ -205,7 +206,12 @@ function renderIdea(data) {
     const colorMap = { "KILL": "#f87171", "PIVOT": "#fbbf24", "DOUBLE DOWN": "#34d399" };
     ui.ideaTitle.style.color = colorMap[a.decision] || "var(--text)";
   }
-  if (ui.ideaDesc) ui.ideaDesc.textContent = a.decisionReason || "";
+  if (ui.ideaDesc) {
+    const verification = a.advancedFeedback?.geminiVerification;
+    ui.ideaDesc.textContent = [a.decisionReason, verification ? `Gemini check: ${verification}` : ""]
+      .filter(Boolean)
+      .join(" ");
+  }
 
   if (ui.ideaMutations) {
     const items = (a.mutations || []).map(m => `<li style="margin-bottom:8px;">${m}</li>`).join("");
@@ -256,7 +262,15 @@ function renderIdea(data) {
     });
   }
 
-  if (ui.meta) ui.meta.innerHTML = `<strong>Idea Evaluation</strong> — Score: <strong>${a.viabilityScore ?? "--"}/100</strong>`;
+  if (ui.meta) {
+    const refinedByGemini = a.llm?.provider === "gemini" && a.llm?.used;
+    const engine = refinedByGemini
+      ? `Local CTGAN + XGBoost model, reviewed by Gemini (${a.llm.model || "Gemini"})`
+      : data.engine === "local-ctgan-xgboost"
+        ? "Local CTGAN + XGBoost model"
+        : "Idea Evaluation";
+    ui.meta.innerHTML = `<strong>${engine}</strong> — Score: <strong>${a.viabilityScore ?? "--"}/100</strong>`;
+  }
 }
 
 // ─── Run company analysis ───────────────────────────────────────
@@ -300,14 +314,15 @@ ui.companyInput?.addEventListener("keydown", e => { if (e.key === "Enter") run()
 
 ui.ideaBtn?.addEventListener("click", async () => {
   const idea = ui.ideaInput?.value.trim();
+  const sectorGroup = ui.ideaSector?.value || "";
   if (!idea) return setStatus("Paste your startup idea first.");
-  setStatus("⏳ Evaluating idea...");
+  setStatus("⏳ Evaluating with the startup model, then asking Gemini to review the model output...");
   if (ui.ideaBtn) {
     ui.ideaBtn.disabled = true;
     ui.ideaBtn.textContent = "ANALYZING...";
   }
   try {
-    const data = await analyzeIdea(idea);
+    const data = await analyzeIdea(idea, sectorGroup);
     renderIdea(data);
     setStatus(`✓ Idea scored ${data.analysis?.viabilityScore ?? "--"}/100`);
     $("ideaResults")?.scrollIntoView({ behavior: "smooth", block: "start" });

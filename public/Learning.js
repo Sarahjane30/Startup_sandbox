@@ -1,377 +1,319 @@
-// =============================================
-//  STARTUP SANDBOX — learning.js
-//  AI-generated lesson content + quizzes via Gemini.
-//  XP, levels, and progress stored in localStorage.
-// =============================================
+// Startup Sandbox learning platform.
+// Local progression + Python Random Forest / Decision Tree personalization.
 
 const $ = (id) => document.getElementById(id);
 
-// ─── Curriculum definition ───────────────────────────────────────
-// Lessons are defined here; CONTENT is always AI-generated.
-const LESSONS = [
-  {
-    id: "idea-validation",
-    icon: "💡",
-    title: "Idea Validation",
-    desc: "How to know if your idea is worth pursuing before spending a dollar.",
-    xp: 20,
-    unlockAfter: null,
-  },
-  {
-    id: "customer-discovery",
-    icon: "🎯",
-    title: "Customer Discovery",
-    desc: "Talk to users before you build. Learn what to ask and how to listen.",
-    xp: 25,
-    unlockAfter: "idea-validation",
-  },
-  {
-    id: "mvp-design",
-    icon: "🛠️",
-    title: "Building an MVP",
-    desc: "What to build, what to cut, and how to launch fast without burning out.",
-    xp: 30,
-    unlockAfter: "customer-discovery",
-  },
-  {
-    id: "pricing-strategy",
-    icon: "💰",
-    title: "Pricing Strategy",
-    desc: "How to price your product: cost-plus, value-based, and freemium models.",
-    xp: 25,
-    unlockAfter: "mvp-design",
-  },
-  {
-    id: "go-to-market",
-    icon: "🚀",
-    title: "Go-To-Market",
-    desc: "Your first 100 users: channels, messaging, and growth loops.",
-    xp: 30,
-    unlockAfter: "pricing-strategy",
-  },
-  {
-    id: "metrics-and-kpis",
-    icon: "📊",
-    title: "Metrics & KPIs",
-    desc: "What to measure, what to ignore, and why retention beats acquisition.",
-    xp: 25,
-    unlockAfter: "go-to-market",
-  },
-  {
-    id: "fundraising",
-    icon: "🏦",
-    title: "Fundraising Basics",
-    desc: "When to raise, how much, and how to pitch without embarrassing yourself.",
-    xp: 35,
-    unlockAfter: "metrics-and-kpis",
-  },
-  {
-    id: "competitive-moats",
-    icon: "⚔️",
-    title: "Competitive Moats",
-    desc: "Network effects, switching costs, data moats — how to build a defensible business.",
-    xp: 35,
-    unlockAfter: "fundraising",
-  },
-];
+const STORE_KEY = "sb_learning_platform_state_v1";
 
-// ─── XP / Level system ──────────────────────────────────────────
-const LEVELS = [
-  { name: "Rookie", min: 0 },
-  { name: "Founder", min: 50 },
-  { name: "Builder", min: 100 },
-  { name: "Operator", min: 175 },
-  { name: "Strategist", min: 250 },
-  { name: "Investor", min: 350 },
-  { name: "Unicorn", min: 500 },
-];
-
-function getLevel(xp) {
-  let level = LEVELS[0];
-  for (const l of LEVELS) { if (xp >= l.min) level = l; else break; }
-  return level;
-}
-function getNextLevel(xp) {
-  for (const l of LEVELS) { if (xp < l.min) return l; }
-  return null;
-}
-
-// ─── Persistence ─────────────────────────────────────────────────
 function loadState() {
   try {
-    return JSON.parse(localStorage.getItem("sb_learn_state") || "{}");
-  } catch { return {}; }
-}
-function saveState(state) {
-  localStorage.setItem("sb_learn_state", JSON.stringify(state));
-}
-
-let state = loadState();
-if (!state.xp) state.xp = 0;
-if (!state.completed) state.completed = [];
-if (!state.streak) state.streak = 0;
-if (!state.lastDate) state.lastDate = null;
-
-// Update streak
-const today = new Date().toDateString();
-if (state.lastDate !== today) {
-  const yesterday = new Date(Date.now() - 86400000).toDateString();
-  state.streak = state.lastDate === yesterday ? state.streak + 1 : 0;
-  state.lastDate = today;
-  saveState(state);
+    return JSON.parse(localStorage.getItem(STORE_KEY) || "{}");
+  } catch {
+    return {};
+  }
 }
 
-// ─── Render UI state ─────────────────────────────────────────────
-function updateUI() {
-  const level = getLevel(state.xp);
-  const next = getNextLevel(state.xp);
-  const pct = next ? Math.round(((state.xp - level.min) / (next.min - level.min)) * 100) : 100;
+function saveState(nextState) {
+  localStorage.setItem(STORE_KEY, JSON.stringify(nextState));
+}
 
-  $("xpCount").textContent = state.xp;
+let state = {
+  xp: 0,
+  completed: [],
+  completedRounds: [],
+  skillScores: {},
+  mistakes: {},
+  streak: 0,
+  achievements: [],
+  sectorInterests: {},
+  ...loadState(),
+};
+
+let platform = null;
+let currentLesson = null;
+let selectedAnswer = null;
+
+async function callLearning(action, payload = {}) {
+  const res = await fetch("/api/learning", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action, state, ...payload }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Learning engine failed");
+  return data;
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function pct(value, max) {
+  return Math.max(0, Math.min(100, Math.round((value / max) * 100)));
+}
+
+function updateHeader() {
+  const level = platform?.level?.current || { name: "Rookie", minXp: 0 };
+  const next = platform?.level?.next;
+  const nextXp = next ? next.minXp : Math.max(state.xp, 1);
+  const baseXp = level.minXp || 0;
+  const xpProgress = next ? pct(state.xp - baseXp, next.minXp - baseXp) : 100;
+  const completedTotal = state.completed?.length || 0;
+  const totalModules = platform?.curriculum?.modules?.length || 90;
+
+  $("xpCount").textContent = state.xp || 0;
   $("levelLabel").textContent = level.name;
-  $("streakCount").textContent = `${state.streak} day${state.streak !== 1 ? "s" : ""}`;
-  $("completedCount").textContent = `${state.completed.length}/${LESSONS.length}`;
-  $("xpBarLabel").textContent = `${state.xp} XP`;
-  $("xpNextLabel").textContent = next ? `Next: ${next.min} XP (${next.name})` : "MAX LEVEL 🏆";
-  $("xpFill").style.width = `${pct}%`;
+  $("streakCount").textContent = `${state.streak || 0} day${state.streak === 1 ? "" : "s"}`;
+  $("completedCount").textContent = `${completedTotal}/${totalModules}`;
+  $("xpBarLabel").textContent = `${state.xp || 0} XP`;
+  $("xpNextLabel").textContent = next ? `Next: ${next.minXp} XP (${next.name})` : "Max level";
+  $("xpFill").style.width = `${xpProgress}%`;
 }
 
-function renderLessons() {
-  const grid = $("lessonGrid");
-  grid.innerHTML = LESSONS.map((lesson, i) => {
-    const done = state.completed.includes(lesson.id);
-    const locked = lesson.unlockAfter && !state.completed.includes(lesson.unlockAfter);
-    let statusClass = "status-available";
-    let statusText = "START";
-    let cardClass = "";
-    if (done) { statusClass = "status-done"; statusText = "✓ COMPLETED"; cardClass = "completed"; }
-    if (locked) { statusClass = "status-locked"; statusText = "🔒 LOCKED"; cardClass = "locked"; }
+function renderInsights() {
+  const weak = platform?.weakness?.weakAreas || [];
+  const strong = platform?.weakness?.strongAreas || [];
+  const recs = platform?.recommendations || [];
+  const sectors = platform?.sectorAffinity?.ranked || [];
+  const achievements = state.achievements || [];
 
+  $("weakSkillList").innerHTML = weak.length ? weak.map((item) => `
+    <div class="insight-row">
+      <span>${escapeHtml(item.label)}</span>
+      <strong>${item.score}/100</strong>
+    </div>
+  `).join("") : `<div class="empty-note">Weak skills will appear after quiz attempts.</div>`;
+
+  $("strongSkillList").innerHTML = strong.length ? strong.map((item) => `
+    <div class="insight-row">
+      <span>${escapeHtml(item.label)}</span>
+      <strong>${item.score}/100</strong>
+    </div>
+  `).join("") : `<div class="empty-note">Strengths unlock as your scores climb.</div>`;
+
+  $("recommendationList").innerHTML = recs.length ? recs.map((item) => `
+    <button class="rec-row" onclick="openLesson('${item.moduleId}')">
+      <span>
+        <strong>${escapeHtml(item.title)}</strong>
+        <small>${escapeHtml(item.reason)}</small>
+      </span>
+      <span class="rec-arrow">Open</span>
+    </button>
+  `).join("") : `<div class="empty-note">Complete a quiz to get adaptive recommendations.</div>`;
+
+  $("sectorAffinityList").innerHTML = sectors.map((item) => `
+    <div class="sector-meter">
+      <span>${escapeHtml(formatSector(item.sector))}</span>
+      <div class="sector-track"><div style="width:${pct(item.confidence, 1)}%"></div></div>
+      <strong>${Math.round(item.confidence * 100)}%</strong>
+    </div>
+  `).join("");
+
+  $("achievementList").innerHTML = achievements.length ? achievements.map((id) => `
+    <span class="achievement-chip">${escapeHtml(id.replaceAll("_", " "))}</span>
+  `).join("") : `<span class="achievement-chip muted">No achievements yet</span>`;
+}
+
+function renderRounds() {
+  const rounds = platform?.curriculum?.rounds || [];
+  $("lessonGrid").innerHTML = rounds.map((round) => {
+    const isSector = round.category === "sector";
+    const status = round.locked ? "Locked" : isSector ? "Sector Path" : `Round ${round.round}`;
     return `
-      <div class="lesson-card ${cardClass}" ${!locked ? `onclick="openLesson('${lesson.id}')"` : ""} data-id="${lesson.id}">
-        <div class="lesson-xp">+${lesson.xp} XP</div>
-        <div class="lesson-icon">${lesson.icon}</div>
-        <div class="lesson-num">MODULE ${String(i + 1).padStart(2, "0")}</div>
-        <div class="lesson-title">${lesson.title}</div>
-        <p class="lesson-desc">${lesson.desc}</p>
-        <span class="lesson-status ${statusClass}">${statusText}</span>
-      </div>
+      <article class="round-panel ${round.locked ? "locked" : ""}">
+        <div class="round-head">
+          <div>
+            <div class="lesson-num">${escapeHtml(status)}</div>
+            <h3>${escapeHtml(round.title)}</h3>
+          </div>
+          <span class="round-count">${round.modules.filter((m) => m.completed).length}/10</span>
+        </div>
+        ${round.locked ? `<p class="unlock-note">${escapeHtml(unlockText(round.unlock))}</p>` : ""}
+        <div class="module-list">
+          ${round.modules.map(renderModule).join("")}
+        </div>
+      </article>
     `;
   }).join("");
 }
 
-// ─── Gemini: fetch lesson content ────────────────────────────────
-async function fetchLessonContent(lesson) {
-  const prompt = `
-You are an expert startup mentor and educator. Teach the topic: "${lesson.title}" — ${lesson.desc}
-
-Write it like Duolingo meets Paul Graham: short, punchy, practical, with real-world examples.
-
-Return ONLY valid JSON (no markdown) matching this schema:
-{
-  "keyPoints": [
-    "string (one concrete, actionable insight)",
-    "string",
-    "string",
-    "string"
-  ],
-  "realWorldExample": "string (2-3 sentences: a specific real startup story that illustrates this topic)",
-  "commonMistake": "string (1-2 sentences: the #1 mistake founders make on this topic)",
-  "proTip": "string (1 sentence: the insider move most founders don't know)",
-  "quiz": {
-    "question": "string (a practical, scenario-based question about this topic)",
-    "options": [
-      "string (option A)",
-      "string (option B)",
-      "string (option C)",
-      "string (option D)"
-    ],
-    "correctIndex": <0-3>,
-    "explanation": "string (2-3 sentences explaining why the correct answer is right and why the others are wrong)"
-  }
-}
-`;
-
-  const res = await fetch("/api/lesson", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ title: lesson.title, desc: lesson.desc })
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data?.error || "Lesson generation failed");
-  return data;
+function renderModule(module) {
+  const status = module.completed ? "Done" : module.locked ? "Locked" : "Start";
+  const skills = module.skills.map((s) => s.replaceAll("_", " ")).slice(0, 2).join(" + ");
+  return `
+    <button class="module-row ${module.completed ? "completed" : ""}" ${module.locked ? "disabled" : `onclick="openLesson('${module.id}')"`}>
+      <span class="module-index">${String(module.module).padStart(2, "0")}</span>
+      <span class="module-main">
+        <strong>${escapeHtml(module.title)}</strong>
+        <small>${escapeHtml(skills)}</small>
+      </span>
+      <span class="module-xp">+${module.xp}</span>
+      <span class="module-status">${status}</span>
+    </button>
+  `;
 }
 
-// ─── Modal: open lesson ──────────────────────────────────────────
-let currentLesson = null;
-let lessonData = null;
-let quizAnswered = false;
+function unlockText(unlock = {}) {
+  if (unlock.completed_round) return `Requires ${unlock.completed_round.replaceAll("-", " ")} completed.`;
+  return "Complete earlier founder rounds to unlock.";
+}
 
-window.openLesson = async function(id) {
-  const lesson = LESSONS.find(l => l.id === id);
-  if (!lesson) return;
+function formatSector(sector) {
+  return {
+    ai_ml: "AI/ML",
+    healthcare: "Healthcare",
+    ecommerce: "Ecommerce",
+    fintech: "Fintech",
+  }[sector] || sector;
+}
 
-  const locked = lesson.unlockAfter && !state.completed.includes(lesson.unlockAfter);
-  if (locked) return;
-
-  currentLesson = lesson;
-  quizAnswered = false;
-  lessonData = null;
-
-  $("modalEyebrow").textContent = `// MODULE — ${lesson.icon} ${lesson.title.toUpperCase()}`;
-  $("modalTitle").textContent = lesson.title;
+window.openLesson = async function openLesson(moduleId) {
+  selectedAnswer = null;
   $("lessonModal").style.display = "flex";
   document.body.style.overflow = "hidden";
-
-  $("modalBody").innerHTML = `
-    <div class="skeleton" style="width:100%; height:14px; margin-bottom:10px;"></div>
-    <div class="skeleton" style="width:88%; height:14px; margin-bottom:10px;"></div>
-    <div class="skeleton" style="width:94%; height:14px; margin-bottom:10px;"></div>
-    <div class="skeleton" style="width:72%; height:14px; margin-bottom:30px;"></div>
-    <div class="skeleton" style="width:60%; height:14px; margin-bottom:10px;"></div>
-    <div class="skeleton" style="width:80%; height:14px;"></div>
-  `;
+  $("modalEyebrow").textContent = "// LOADING MODULE";
+  $("modalTitle").textContent = "Loading...";
+  $("modalBody").innerHTML = skeletonHtml();
 
   try {
-    lessonData = await fetchLessonContent(lesson);
-    renderModal(lesson, lessonData);
+    currentLesson = await callLearning("lesson", { moduleId });
+    renderModal(currentLesson);
   } catch (err) {
-    $("modalBody").innerHTML = `<p style="color:var(--red);">Failed to load lesson: ${err.message}</p><p style="color:var(--muted); font-size:0.85rem; margin-top:8px;">Check your Gemini API key.</p>`;
+    $("modalBody").innerHTML = `<p class="error-text">${escapeHtml(err.message)}</p>`;
   }
 };
 
-function renderModal(lesson, data) {
-  const alreadyDone = state.completed.includes(lesson.id);
-
-  const keyPoints = (data.keyPoints || []).map(pt => `
-    <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:12px;">
-      <span style="color:var(--primary); font-weight:700; flex-shrink:0;">→</span>
-      <span>${pt}</span>
-    </div>
-  `).join("");
-
+function renderModal(lessonPayload) {
+  const lesson = lessonPayload.module;
+  const quiz = lessonPayload.quiz;
+  $("modalEyebrow").textContent = `// ${lesson.roundTitle.toUpperCase()} - MODULE ${String(lesson.module).padStart(2, "0")}`;
+  $("modalTitle").textContent = lesson.title;
   $("modalBody").innerHTML = `
     <div class="modal-content">
-      <div style="margin-bottom:24px;">
-        <p style="font-family:var(--font-mono); font-size:0.72px; color:var(--primary); letter-spacing:1.5px; margin-bottom:12px; font-size:0.72rem;">// KEY CONCEPTS</p>
-        ${keyPoints}
+      <div class="lesson-tags">
+        ${lesson.skillTypes.map((t) => `<span>${escapeHtml(t)}</span>`).join("")}
+        ${lesson.skills.map((s) => `<span>${escapeHtml(s.replaceAll("_", " "))}</span>`).join("")}
       </div>
-
-      <div style="background:rgba(0,0,0,0.2); border:1px solid var(--border); border-radius:8px; padding:18px; margin-bottom:20px;">
-        <p style="font-family:var(--font-mono); font-size:0.72rem; color:var(--accent); letter-spacing:1.5px; margin-bottom:10px;">// REAL WORLD EXAMPLE</p>
-        <p style="color:var(--muted); font-size:0.92rem; line-height:1.7;">${data.realWorldExample || ""}</p>
+      <div class="lesson-block">
+        <p class="modal-label">// KEY CONCEPTS</p>
+        ${lessonPayload.keyPoints.map((point) => `<div class="key-point"><span>+</span><p>${escapeHtml(point)}</p></div>`).join("")}
       </div>
-
-      <div style="background:rgba(248,113,113,0.06); border:1px solid rgba(248,113,113,0.2); border-radius:8px; padding:18px; margin-bottom:20px;">
-        <p style="font-family:var(--font-mono); font-size:0.72rem; color:var(--red); letter-spacing:1.5px; margin-bottom:10px;">// COMMON MISTAKE</p>
-        <p style="color:var(--muted); font-size:0.92rem; line-height:1.7;">${data.commonMistake || ""}</p>
+      <div class="lesson-callout">
+        <p class="modal-label">// FOUNDER EXAMPLE</p>
+        <p>${escapeHtml(lessonPayload.realWorldExample)}</p>
       </div>
-
-      <div style="background:rgba(79,142,255,0.08); border:1px solid rgba(79,142,255,0.25); border-radius:8px; padding:18px; margin-bottom:28px;">
-        <p style="font-family:var(--font-mono); font-size:0.72rem; color:var(--primary); letter-spacing:1.5px; margin-bottom:10px;">// PRO TIP</p>
-        <p style="color:var(--text); font-size:0.95rem; line-height:1.7; font-style:italic;">${data.proTip || ""}</p>
+      <div class="lesson-warning">
+        <p class="modal-label">// COMMON MISTAKE</p>
+        <p>${escapeHtml(lessonPayload.commonMistake)}</p>
+      </div>
+      <div class="lesson-callout blue">
+        <p class="modal-label">// PRO TIP</p>
+        <p>${escapeHtml(lessonPayload.proTip)}</p>
       </div>
     </div>
-
-    <!-- QUIZ -->
-    <div class="quiz-section" id="quizSection">
-      <div class="quiz-q">🧠 Quick Check: ${data.quiz?.question || ""}</div>
-      <div class="quiz-options" id="quizOptions">
-        ${(data.quiz?.options || []).map((opt, i) => `
-          <button class="quiz-opt" onclick="answerQuiz(${i})">${opt}</button>
+    <div class="quiz-section">
+      <div class="quiz-q">${escapeHtml(quiz.question)}</div>
+      <div class="quiz-options">
+        ${quiz.options.map((option, index) => `
+          <button class="quiz-opt" onclick="selectAnswer(${index})">${escapeHtml(option)}</button>
         `).join("")}
       </div>
       <div id="quizFeedback"></div>
     </div>
-
-    <button class="modal-next-btn" id="modalNextBtn" style="display:none;" onclick="completeLesson()">
-      ${alreadyDone ? "✓ Already Completed — Close" : `Claim +${lesson.xp} XP & Continue →`}
-    </button>
-
-    ${alreadyDone ? `<p style="text-align:center; font-family:var(--font-mono); font-size:0.78rem; color:var(--green); margin-top:16px;">✓ You've already completed this module</p>` : ""}
+    <button class="modal-next-btn" id="modalNextBtn" onclick="submitQuiz()" disabled>Submit Answer</button>
   `;
 }
 
-window.answerQuiz = function(index) {
-  if (quizAnswered || !lessonData?.quiz) return;
-  quizAnswered = true;
-
-  const correct = lessonData.quiz.correctIndex;
-  const opts = document.querySelectorAll(".quiz-opt");
-  opts.forEach((opt, i) => {
-    opt.disabled = true;
-    if (i === correct) opt.classList.add("correct");
-    else if (i === index) opt.classList.add("wrong");
+window.selectAnswer = function selectAnswer(index) {
+  selectedAnswer = index;
+  document.querySelectorAll(".quiz-opt").forEach((button, i) => {
+    button.classList.toggle("selected", i === index);
   });
+  $("modalNextBtn").disabled = false;
+};
 
-  const isCorrect = index === correct;
+window.submitQuiz = async function submitQuiz() {
+  if (!currentLesson || selectedAnswer === null) return;
+  $("modalNextBtn").disabled = true;
+  $("modalNextBtn").textContent = "Scoring...";
+  try {
+    const payload = await callLearning("submit", {
+      moduleId: currentLesson.module.id,
+      selectedIndex: selectedAnswer,
+    });
+    state = payload.state;
+    saveState(state);
+    platform = payload;
+    showQuizResult(payload);
+    updateHeader();
+    renderInsights();
+    renderRounds();
+  } catch (err) {
+    $("quizFeedback").innerHTML = `<div class="quiz-feedback feedback-wrong">${escapeHtml(err.message)}</div>`;
+  } finally {
+    $("modalNextBtn").textContent = "Close";
+    $("modalNextBtn").disabled = false;
+    $("modalNextBtn").onclick = closeModal;
+  }
+};
+
+function showQuizResult(payload) {
+  const correct = payload.result.correct;
+  document.querySelectorAll(".quiz-opt").forEach((button, i) => {
+    button.disabled = true;
+    if (i === 0) button.classList.add("correct");
+    if (!correct && i === selectedAnswer) button.classList.add("wrong");
+  });
+  const achievementText = payload.newAchievements?.length
+    ? `<p class="mini-reward">${payload.newAchievements.map((a) => escapeHtml(a.title)).join(" + ")}</p>`
+    : "";
   $("quizFeedback").innerHTML = `
-    <div class="quiz-feedback ${isCorrect ? "feedback-correct" : "feedback-wrong"}">
-      ${isCorrect ? "🎉 Correct! " : "❌ Not quite. "}${lessonData.quiz.explanation || ""}
+    <div class="quiz-feedback ${correct ? "feedback-correct" : "feedback-wrong"}">
+      <strong>${correct ? "Correct." : "Not quite."}</strong>
+      ${correct ? ` +${payload.xpReward.xp} XP added.` : " Review the scenario and try the next module."}
+      ${achievementText}
     </div>
   `;
+}
 
-  $("modalNextBtn").style.display = "block";
-};
-
-window.completeLesson = function() {
-  if (!currentLesson) return;
-  const alreadyDone = state.completed.includes(currentLesson.id);
-  if (!alreadyDone) {
-    state.xp += currentLesson.xp;
-    state.completed.push(currentLesson.id);
-    saveState(state);
-  }
-  closeModal();
-  updateUI();
-  renderLessons();
-
-  if (!alreadyDone) {
-    showToast(`+${currentLesson.xp} XP earned! 🎉`);
-  }
-};
+function skeletonHtml() {
+  return `
+    <div class="skeleton" style="width:100%; height:14px;"></div>
+    <div class="skeleton" style="width:88%; height:14px;"></div>
+    <div class="skeleton" style="width:94%; height:14px;"></div>
+    <div class="skeleton" style="width:70%; height:14px;"></div>
+  `;
+}
 
 function closeModal() {
   $("lessonModal").style.display = "none";
   document.body.style.overflow = "";
   currentLesson = null;
-  lessonData = null;
-  quizAnswered = false;
+  selectedAnswer = null;
 }
 
 $("modalClose")?.addEventListener("click", closeModal);
-$("lessonModal")?.addEventListener("click", e => {
-  if (e.target === $("lessonModal")) closeModal();
+$("lessonModal")?.addEventListener("click", (event) => {
+  if (event.target === $("lessonModal")) closeModal();
 });
-document.addEventListener("keydown", e => {
-  if (e.key === "Escape") closeModal();
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeModal();
 });
 
-// ─── Toast notification ──────────────────────────────────────────
-function showToast(msg) {
-  const toast = document.createElement("div");
-  toast.textContent = msg;
-  Object.assign(toast.style, {
-    position: "fixed", bottom: "32px", left: "50%", transform: "translateX(-50%) translateY(20px)",
-    background: "var(--primary)", color: "#fff",
-    fontFamily: "var(--font-display)", fontWeight: "700", fontSize: "0.95rem",
-    padding: "14px 28px", borderRadius: "99px",
-    boxShadow: "0 8px 32px rgba(79,142,255,0.4)",
-    zIndex: "999", opacity: "0",
-    transition: "all 0.3s ease",
-  });
-  document.body.appendChild(toast);
-  requestAnimationFrame(() => {
-    toast.style.opacity = "1";
-    toast.style.transform = "translateX(-50%) translateY(0)";
-  });
-  setTimeout(() => {
-    toast.style.opacity = "0";
-    toast.style.transform = "translateX(-50%) translateY(20px)";
-    setTimeout(() => toast.remove(), 400);
-  }, 2800);
+async function boot() {
+  $("lessonGrid").innerHTML = `<div class="loading-panel">${skeletonHtml()}</div>`;
+  try {
+    platform = await callLearning("analyze");
+    updateHeader();
+    renderInsights();
+    renderRounds();
+  } catch (err) {
+    $("lessonGrid").innerHTML = `<div class="error-text">${escapeHtml(err.message)}</div>`;
+  }
 }
 
-// ─── Boot ────────────────────────────────────────────────────────
-updateUI();
-renderLessons();
+boot();

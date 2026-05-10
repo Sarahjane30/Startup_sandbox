@@ -1,0 +1,315 @@
+{
+  "dataset": "C:\\Users\\sarah\\Documents\\Codex\\2026-05-02\\Startup_sandbox\\ai_model\\data_sets\\data_sets\\final_training_data_v2.csv",
+  "rows": 7505,
+  "columns": [
+    "sector",
+    "funding_total_usd",
+    "company_age",
+    "Giants",
+    "No Budget",
+    "Competition",
+    "Poor Market Fit",
+    "Acquisition Stagnation",
+    "Platform Dependency",
+    "Monetization Failure",
+    "Niche Limits",
+    "Execution Flaws",
+    "Trend Shifts",
+    "Toxicity/Trust Issues",
+    "Regulatory Pressure",
+    "Overhype",
+    "High Operational Costs",
+    "sector_group",
+    "funding_log1p"
+  ],
+  "target_distribution": {
+    "1": 7096,
+    "0": 409
+  },
+  "drop_risk_features": false,
+  "train_distribution": {
+    "1": 4541,
+    "0": 262
+  },
+  "imbalance_ratio": 17.33206106870229,
+  "balance": {
+    "method": "minority_interpolation",
+    "minority_class": 0,
+    "original_minority_count": 262,
+    "synthetic_rows": 3143,
+    "target_minority_ratio": 0.75,
+    "note": "GAN libraries were not required; this uses SMOTE-style interpolation after preprocessing."
+  },
+  "selected_model": "balanced_generalist",
+  "validation": {
+    "threshold": 0.38,
+    "accuracy": 0.9991673605328892,
+    "balanced_accuracy": 0.9923076923076923,
+    "macro_f1": 0.9959040574045843,
+    "roc_auc": 1.0,
+    "confusion_matrix": [
+      [
+        64,
+        1
+      ],
+      [
+        0,
+        1136
+      ]
+    ],
+    "class_metrics": {
+      "failure_0": {
+        "precision": 1.0,
+        "recall": 0.9846153846153847,
+        "f1": 0.9922480620155039,
+        "support": 65
+      },
+      "success_1": {
+        "precision": 0.9991204925241864,
+        "recall": 1.0,
+        "f1": 0.9995600527936648,
+        "support": 1136
+      }
+    },
+    "classification_report": "              precision    recall  f1-score   support\n\n           0       1.00      0.98      0.99        65\n           1       1.00      1.00      1.00      1136\n\n    accuracy                           1.00      1201\n   macro avg       1.00      0.99      1.00      1201\nweighted avg       1.00      1.00      1.00      1201\n"
+  },
+  "test": {
+    "threshold": 0.38,
+    "accuracy": 0.9986675549633578,
+    "balanced_accuracy": 0.9878048780487805,
+    "macro_f1": 0.9934750478177707,
+    "roc_auc": 0.99999140583372,
+    "confusion_matrix": [
+      [
+        80,
+        2
+      ],
+      [
+        0,
+        1419
+      ]
+    ],
+    "class_metrics": {
+      "failure_0": {
+        "precision": 1.0,
+        "recall": 0.975609756097561,
+        "f1": 0.9876543209876543,
+        "support": 82
+      },
+      "success_1": {
+        "precision": 0.9985925404644617,
+        "recall": 1.0,
+        "f1": 0.9992957746478873,
+        "support": 1419
+      }
+    },
+    "classification_report": "              precision    recall  f1-score   support\n\n           0       1.00      0.98      0.99        82\n           1       1.00      1.00      1.00      1419\n\n    accuracy                           1.00      1501\n   macro avg       1.00      0.99      0.99      1501\nweighted avg       1.00      1.00      1.00      1501\n"
+  },
+  "candidate_models": [
+    {
+      "name": "balanced_generalist",
+      "threshold": 0.38,
+      "selection_score": 0.9946453296206721,
+      "threshold_search": {
+        "macro_f1": 0.9959040574045843,
+        "balanced_accuracy": 0.9923076923076923
+      },
+      "validation": {
+        "threshold": 0.38,
+        "accuracy": 0.9991673605328892,
+        "balanced_accuracy": 0.9923076923076923,
+        "macro_f1": 0.9959040574045843,
+        "roc_auc": 1.0,
+        "confusion_matrix": [
+          [
+            64,
+            1
+          ],
+          [
+            0,
+            1136
+          ]
+        ],
+        "class_metrics": {
+          "failure_0": {
+            "precision": 1.0,
+            "recall": 0.9846153846153847,
+            "f1": 0.9922480620155039,
+            "support": 65
+          },
+          "success_1": {
+            "precision": 0.9991204925241864,
+            "recall": 1.0,
+            "f1": 0.9995600527936648,
+            "support": 1136
+          }
+        },
+        "classification_report": "              precision    recall  f1-score   support\n\n           0       1.00      0.98      0.99        65\n           1       1.00      1.00      1.00      1136\n\n    accuracy                           1.00      1201\n   macro avg       1.00      0.99      1.00      1201\nweighted avg       1.00      1.00      1.00      1201\n"
+      }
+    },
+    {
+      "name": "high_recall_failure",
+      "threshold": 0.41000000000000003,
+      "selection_score": 0.9946453296206721,
+      "threshold_search": {
+        "macro_f1": 0.9959040574045843,
+        "balanced_accuracy": 0.9923076923076923
+      },
+      "validation": {
+        "threshold": 0.41000000000000003,
+        "accuracy": 0.9991673605328892,
+        "balanced_accuracy": 0.9923076923076923,
+        "macro_f1": 0.9959040574045843,
+        "roc_auc": 0.9999932286023835,
+        "confusion_matrix": [
+          [
+            64,
+            1
+          ],
+          [
+            0,
+            1136
+          ]
+        ],
+        "class_metrics": {
+          "failure_0": {
+            "precision": 1.0,
+            "recall": 0.9846153846153847,
+            "f1": 0.9922480620155039,
+            "support": 65
+          },
+          "success_1": {
+            "precision": 0.9991204925241864,
+            "recall": 1.0,
+            "f1": 0.9995600527936648,
+            "support": 1136
+          }
+        },
+        "classification_report": "              precision    recall  f1-score   support\n\n           0       1.00      0.98      0.99        65\n           1       1.00      1.00      1.00      1136\n\n    accuracy                           1.00      1201\n   macro avg       1.00      0.99      1.00      1201\nweighted avg       1.00      1.00      1.00      1201\n"
+      }
+    },
+    {
+      "name": "deeper_interactions",
+      "threshold": 0.44999999999999996,
+      "selection_score": 0.9946453296206721,
+      "threshold_search": {
+        "macro_f1": 0.9959040574045843,
+        "balanced_accuracy": 0.9923076923076923
+      },
+      "validation": {
+        "threshold": 0.44999999999999996,
+        "accuracy": 0.9991673605328892,
+        "balanced_accuracy": 0.9923076923076923,
+        "macro_f1": 0.9959040574045843,
+        "roc_auc": 1.0,
+        "confusion_matrix": [
+          [
+            64,
+            1
+          ],
+          [
+            0,
+            1136
+          ]
+        ],
+        "class_metrics": {
+          "failure_0": {
+            "precision": 1.0,
+            "recall": 0.9846153846153847,
+            "f1": 0.9922480620155039,
+            "support": 65
+          },
+          "success_1": {
+            "precision": 0.9991204925241864,
+            "recall": 1.0,
+            "f1": 0.9995600527936648,
+            "support": 1136
+          }
+        },
+        "classification_report": "              precision    recall  f1-score   support\n\n           0       1.00      0.98      0.99        65\n           1       1.00      1.00      1.00      1136\n\n    accuracy                           1.00      1201\n   macro avg       1.00      0.99      1.00      1201\nweighted avg       1.00      1.00      1.00      1201\n"
+      }
+    }
+  ],
+  "top_features": [
+    {
+      "feature": "Giants",
+      "importance": 0.7469901442527771
+    },
+    {
+      "feature": "Competition",
+      "importance": 0.12987565994262695
+    },
+    {
+      "feature": "sector_Information",
+      "importance": 0.044972438365221024
+    },
+    {
+      "feature": "sector_Retail Trade",
+      "importance": 0.03974581137299538
+    },
+    {
+      "feature": "Poor Market Fit",
+      "importance": 0.011633886024355888
+    },
+    {
+      "feature": "No Budget",
+      "importance": 0.007595091592520475
+    },
+    {
+      "feature": "Monetization Failure",
+      "importance": 0.005238715559244156
+    },
+    {
+      "feature": "Execution Flaws",
+      "importance": 0.004851224832236767
+    },
+    {
+      "feature": "Acquisition Stagnation",
+      "importance": 0.0028927645180374384
+    },
+    {
+      "feature": "sector_Health Care",
+      "importance": 0.0012016933178529143
+    },
+    {
+      "feature": "company_age",
+      "importance": 0.0011851878371089697
+    },
+    {
+      "feature": "sector_Software|Telecommunications",
+      "importance": 0.0009922218741849065
+    },
+    {
+      "feature": "funding_log1p",
+      "importance": 0.0007458017789758742
+    },
+    {
+      "feature": "funding_total_usd",
+      "importance": 0.0005273385904729366
+    },
+    {
+      "feature": "sector_group_retail",
+      "importance": 0.0005135906394571066
+    },
+    {
+      "feature": "sector_infrequent_sklearn",
+      "importance": 0.0004898891202174127
+    },
+    {
+      "feature": "sector_group_health_care",
+      "importance": 0.00022240406542550772
+    },
+    {
+      "feature": "sector_group_legal",
+      "importance": 0.000185917378985323
+    },
+    {
+      "feature": "sector_group_information",
+      "importance": 0.00014025655400473624
+    },
+    {
+      "feature": "sector_group_collaboration",
+      "importance": 0.0
+    }
+  ]
+}

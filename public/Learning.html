@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Startup Sandbox — Learn Business</title>
+  <title>Startup Sandbox - Founder Academy</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -22,80 +22,85 @@
         <a href="simulation.html" class="nav-link">Simulate</a>
         <a href="learning.html" class="nav-link is-active">Learn</a>
       </div>
-      <a href="simulation.html" class="nav-cta">Run Simulation →</a>
+      <a href="simulation.html" class="nav-cta">Run Simulation</a>
     </div>
   </nav>
 
   <main class="wrap">
-
-    <!-- HERO -->
     <section class="learn-hero">
-      <div class="hero-eyebrow">// BUSINESS LEARNING PLATFORM</div>
-      <h1 class="hero-h1"><br/><span class="grad">Learn.</span></h1>
-      <p class="hero-lead">Bite-sized, AI-powered lessons on startup fundamentals. Earn XP, unlock modules, and build real business intuition.</p>
+      <div class="hero-eyebrow">// FOUNDER LEARNING PLATFORM</div>
+      <h1 class="hero-h1"><span class="grad">Founder Academy.</span></h1>
+      <p class="hero-lead">Progress through startup rounds, improve soft and technical skills, unlock sector paths, and let the local ML engine adapt the journey.</p>
 
-      <!-- Stats row -->
       <div class="stats-row">
-        <div class="stat-pill">🔥 Streak: <span class="stat-val" id="streakCount">0 days</span></div>
-        <div class="stat-pill">⚡ XP: <span class="stat-val" id="xpCount">0</span></div>
-        <div class="stat-pill">🏆 Level: <span class="stat-val" id="levelLabel">Rookie</span></div>
-        <div class="stat-pill">✅ Completed: <span class="stat-val" id="completedCount">0/8</span></div>
+        <div class="stat-pill">Streak: <span class="stat-val" id="streakCount">0 days</span></div>
+        <div class="stat-pill">XP: <span class="stat-val" id="xpCount">0</span></div>
+        <div class="stat-pill">Level: <span class="stat-val" id="levelLabel">Rookie</span></div>
+        <div class="stat-pill">Completed: <span class="stat-val" id="completedCount">0/90</span></div>
       </div>
 
-      <!-- XP bar -->
       <div class="xp-bar-wrap">
         <div class="xp-labels">
           <span id="xpBarLabel">0 XP</span>
-          <span id="xpNextLabel">Next: 100 XP</span>
+          <span id="xpNextLabel">Next: 250 XP</span>
         </div>
         <div class="xp-track"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
       </div>
     </section>
 
-    <!-- LESSON GRID -->
-    <section style="padding-bottom: 80px;">
-      <div class="section-eyebrow">// CURRICULUM</div>
-      <h2 class="section-h2" style="margin-bottom:32px;">Choose Your Module</h2>
-      <div class="lessons-grid" id="lessonGrid">
-        <!-- Injected by JS -->
+    <section class="learn-dashboard">
+      <div class="learn-panel">
+        <div class="panel-label">// WEAK SKILLS</div>
+        <div id="weakSkillList"></div>
+      </div>
+      <div class="learn-panel">
+        <div class="panel-label">// STRONG SKILLS</div>
+        <div id="strongSkillList"></div>
+      </div>
+      <div class="learn-panel wide">
+        <div class="panel-label">// RANDOM FOREST RECOMMENDATIONS</div>
+        <div id="recommendationList"></div>
+      </div>
+      <div class="learn-panel">
+        <div class="panel-label">// SECTOR AFFINITY</div>
+        <div id="sectorAffinityList"></div>
+      </div>
+      <div class="learn-panel">
+        <div class="panel-label">// ACHIEVEMENTS</div>
+        <div class="achievement-list" id="achievementList"></div>
       </div>
     </section>
 
-    <!-- CTA -->
+    <section style="padding-bottom: 80px;">
+      <div class="section-eyebrow">// CURRICULUM</div>
+      <h2 class="section-h2" style="margin-bottom:32px;">Universal Rounds & Sector Paths</h2>
+      <div class="lessons-grid" id="lessonGrid"></div>
+    </section>
+
     <section class="cta-section">
       <div class="cta-cards">
         <a href="index.html" class="cta-card">
-          <div class="cta-icon">🔍</div>
           <div class="cta-label">ANALYZE</div>
           <div class="cta-title">Put It Into Practice</div>
-          <p class="cta-desc">Apply what you learned — analyze any real company with AI.</p>
-          <div class="cta-arrow">→</div>
+          <p class="cta-desc">Apply what you learned by analyzing a real startup or company.</p>
+          <div class="cta-arrow">Open</div>
         </a>
         <a href="simulation.html" class="cta-card">
-          <div class="cta-icon">🔮</div>
           <div class="cta-label">SIMULATE</div>
-          <div class="cta-title">Test Your Idea</div>
-          <p class="cta-desc">Run a full simulation of your startup's future trajectory.</p>
-          <div class="cta-arrow">→</div>
+          <div class="cta-title">Test a Founder Decision</div>
+          <p class="cta-desc">Use scenarios to practice market, finance, product, and team tradeoffs.</p>
+          <div class="cta-arrow">Open</div>
         </a>
       </div>
     </section>
-
   </main>
 
-  <!-- LESSON MODAL -->
   <div class="modal-overlay" id="lessonModal" style="display:none;">
     <div class="modal">
-      <button class="modal-close" id="modalClose">✕</button>
+      <button class="modal-close" id="modalClose">x</button>
       <div class="modal-eyebrow" id="modalEyebrow">// LESSON</div>
       <div class="modal-title" id="modalTitle">Loading...</div>
-
-      <div id="modalBody">
-        <div class="skeleton" style="width:100%; height:14px;"></div>
-        <div class="skeleton" style="width:85%; height:14px;"></div>
-        <div class="skeleton" style="width:90%; height:14px;"></div>
-        <div class="skeleton" style="width:70%; height:14px;"></div>
-      </div>
+      <div id="modalBody"></div>
     </div>
   </div>
 

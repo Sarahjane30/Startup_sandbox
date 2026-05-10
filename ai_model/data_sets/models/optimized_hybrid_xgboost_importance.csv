@@ -1,0 +1,190 @@
+feature,importance
+Giants,0.74699014
+Competition,0.12987566
+sector_Information,0.04497244
+sector_Retail Trade,0.03974581
+Poor Market Fit,0.011633886
+No Budget,0.0075950916
+Monetization Failure,0.0052387156
+Execution Flaws,0.004851225
+Acquisition Stagnation,0.0028927645
+sector_Health Care,0.0012016933
+company_age,0.0011851878
+sector_Software|Telecommunications,0.0009922219
+funding_log1p,0.0007458018
+funding_total_usd,0.0005273386
+sector_group_retail,0.00051359064
+sector_infrequent_sklearn,0.0004898891
+sector_group_health_care,0.00022240407
+sector_group_legal,0.00018591738
+sector_group_information,0.00014025655
+sector_group_collaboration,0.0
+sector_group_commercial_real_estate,0.0
+sector_group_communications_infrastructure,0.0
+sector_group_communities,0.0
+sector_group_cloud_computing,0.0
+sector_group_content,0.0
+sector_group_computers,0.0
+sector_group_consulting,0.0
+sector_group_consumer_goods,0.0
+sector_group_clean_energy,0.0
+sector_group_content_delivery,0.0
+sector_group_cyber_security,0.0
+sector_group_data_security,0.0
+sector_group_databases,0.0
+sector_group_clean_technology,0.0
+sector_group_audio,0.0
+sector_group_business_services,0.0
+sector_Web Hosting,0.0
+sector_Social Media,0.0
+sector_Social Media|Social Network Media,0.0
+sector_Software,0.0
+sector_Software|Video,0.0
+sector_Technology,0.0
+sector_Telecommunications,0.0
+sector_Transportation,0.0
+sector_Travel,0.0
+sector_group_advertising,0.0
+sector_group_broadcasting,0.0
+sector_group_analytics,0.0
+sector_group_apps,0.0
+sector_group_artists_globally,0.0
+sector_group_digital_media,0.0
+sector_group_auto,0.0
+sector_group_automotive,0.0
+sector_group_b2b,0.0
+sector_group_banking,0.0
+sector_group_design,0.0
+sector_group_facebook_applications,0.0
+sector_group_education,0.0
+sector_group_security,0.0
+sector_group_news,0.0
+sector_group_nonprofits,0.0
+sector_group_photography,0.0
+sector_group_public_relations,0.0
+sector_group_public_transportation,0.0
+sector_group_real_estate,0.0
+sector_group_reviews_and_recommendations,0.0
+sector_group_search,0.0
+sector_group_semiconductors,0.0
+sector_group_network_security,0.0
+sector_group_service_providers,0.0
+sector_group_services,0.0
+sector_group_social_media,0.0
+sector_group_technology,0.0
+sector_group_telecommunications,0.0
+sector_group_transportation,0.0
+sector_group_travel,0.0
+sector_group_unknown,0.0
+sector_group_networking,0.0
+sector_group_nanotechnology,0.0
+sector_group_electronics,0.0
+sector_group_games,0.0
+sector_group_email,0.0
+sector_group_energy,0.0
+sector_group_entertainment,0.0
+sector_Semiconductors,0.0
+sector_group_fashion,0.0
+sector_group_finance,0.0
+sector_group_financial_services,0.0
+sector_group_food_services,0.0
+sector_group_human_resources,0.0
+sector_group_music,0.0
+sector_group_information_security,0.0
+sector_group_information_services,0.0
+sector_group_information_technology,0.0
+sector_group_infrastructure,0.0
+sector_group_manufacturing,0.0
+sector_group_marketplaces,0.0
+sector_group_media,0.0
+sector_group_messaging,0.0
+sector_Services,0.0
+sector_Public Relations|Telecommunications,0.0
+sector_Security|Software,0.0
+sector_Security,0.0
+sector_Biotechnology|Health and Wellness,0.0
+sector_Biotechnology|Health and Wellness|Health Care,0.0
+sector_Biotechnology|Health and Wellness|Pharmaceuticals,0.0
+sector_Biotechnology|Medical,0.0
+sector_Biotechnology|Medical Devices,0.0
+sector_Biotechnology|Medical|Pharmaceuticals,0.0
+sector_Business Services,0.0
+sector_Clean Technology,0.0
+sector_Collaboration|Software,0.0
+sector_Communications Infrastructure,0.0
+sector_Computers|Software|Technology,0.0
+sector_Consulting,0.0
+sector_Curated Web,0.0
+sector_Curated Web|Finance,0.0
+sector_Curated Web|Software,0.0
+sector_Design,0.0
+sector_E-Commerce,0.0
+sector_E-Commerce|Internet,0.0
+sector_EdTech|Education,0.0
+sector_Biotechnology|Health Diagnostics,0.0
+sector_Biotechnology|Health Care|Therapeutics,0.0
+sector_Biotechnology|Health Care|Health Diagnostics,0.0
+sector_Accommodation and Food Services,0.0
+Platform Dependency,0.0
+Niche Limits,0.0
+Trend Shifts,0.0
+Toxicity/Trust Issues,0.0
+Regulatory Pressure,0.0
+Overhype,0.0
+High Operational Costs,0.0
+sector_0,0.0
+sector_Advertising,0.0
+sector_Biotechnology|Health Care,0.0
+sector_Advertising|Analytics,0.0
+sector_Advertising|Media,0.0
+sector_Advertising|Mobile,0.0
+sector_Analytics,0.0
+sector_Automotive,0.0
+sector_Banking,0.0
+sector_Bio-Pharm|Medical|Pharmaceuticals,0.0
+sector_Biotechnology,0.0
+sector_Education,0.0
+sector_Email|Software,0.0
+sector_Enterprise Software,0.0
+sector_Networking,0.0
+sector_Medical Devices,0.0
+sector_Messaging,0.0
+sector_Mobile,0.0
+sector_Mobile|Networking,0.0
+sector_Mobile|Software,0.0
+sector_Mobile|Wireless,0.0
+sector_Music,0.0
+sector_Nanotechnology,0.0
+sector_News,0.0
+sector_Manufacturing,0.0
+sector_News|Social Media,0.0
+sector_Nonprofits,0.0
+sector_Pharmaceuticals,0.0
+sector_Photography,0.0
+sector_Public Relations,0.0
+sector_Public Transportation,0.0
+sector_Real Estate,0.0
+sector_Search,0.0
+sector_Medical,0.0
+sector_Legal,0.0
+sector_Enterprise Software|Software,0.0
+sector_Games|Video,0.0
+sector_Enterprise Software|Storage,0.0
+sector_Fashion,0.0
+sector_Finance,0.0
+sector_Finance and Insurance,0.0
+sector_Finance|FinTech,0.0
+sector_Financial Services,0.0
+sector_Games,0.0
+sector_Games|Television,0.0
+sector_Hardware + Software,0.0
+sector_Internet|Software,0.0
+sector_Health Care|Healthcare Services|Hospitals,0.0
+sector_Health Care|Medical Devices,0.0
+sector_Health Care|Medical|Medical Devices,0.0
+sector_Health and Wellness,0.0
+sector_Health and Wellness|Health Care,0.0
+sector_Hospitality,0.0
+sector_Information Technology,0.0
+sector_Internet,0.0
+sector_group_infrequent_sklearn,0.0
