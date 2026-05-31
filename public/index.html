@@ -6,11 +6,12 @@
   <title>Startup Sandbox — Validate. Simulate. Learn.</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+  <div class="cursor-glow" id="cursorGlow"></div>
   <div class="noise"></div>
   <div class="glow glow-1"></div>
   <div class="glow glow-2"></div>
@@ -77,6 +78,27 @@
         </div>
       </div>
     </section>
+
+    <!-- RECENT LAUNCHES -->
+    <section class="launches-section" id="productHuntSection">
+      <div class="launches-header">
+        <div>
+          <div class="section-eyebrow">// LIVE LAUNCH RADAR</div>
+          <h2 class="section-h2">Today's New<br/><span class="grad">Launches.</span></h2>
+        </div>
+        <button id="phRefreshBtn" class="refresh-btn" type="button" aria-label="Refresh recent launches">
+          <span>Refresh</span>
+        </button>
+      </div>
+      <div class="launches-meta" id="phStatus">Loading Product Hunt and Google launch signals...</div>
+      <div class="launches-grid" id="phGrid">
+        <article class="launch-card launch-skeleton"></article>
+        <article class="launch-card launch-skeleton"></article>
+        <article class="launch-card launch-skeleton"></article>
+      </div>
+    </section>
+
+    <div class="page-divider compact"></div>
 
     <!-- DASHBOARD -->
     <section class="dashboard" id="analysisResults">
@@ -185,6 +207,7 @@
         </div>
         <textarea id="ideaInput" placeholder="Paste your startup idea here. Include: who the customer is, what problem you solve, how your product works, and how you make money."></textarea>
         <button id="ideaBtn" class="idea-submit-btn">VALIDATE IDEA →</button>
+        <div id="ideaStatus" class="idea-status" aria-live="polite"></div>
       </div>
     </section>
 

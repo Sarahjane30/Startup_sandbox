@@ -5,6 +5,11 @@ const $ = (id) => document.getElementById(id);
 
 const STORE_KEY = "sb_learning_platform_state_v1";
 
+function apiUrl(path) {
+  const base = window.API_BASE_URL || (window.location.protocol === "file:" ? "http://localhost:3000" : "");
+  return `${base}${path}`;
+}
+
 function loadState() {
   try {
     return JSON.parse(localStorage.getItem(STORE_KEY) || "{}");
@@ -34,12 +39,12 @@ let currentLesson = null;
 let selectedAnswer = null;
 
 async function callLearning(action, payload = {}) {
-  const res = await fetch("/api/learning", {
+  const res = await fetch(apiUrl("/api/learning"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ action, state, ...payload }),
   });
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || "Learning engine failed");
   return data;
 }

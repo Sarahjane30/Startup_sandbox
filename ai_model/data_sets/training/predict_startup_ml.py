@@ -10,15 +10,19 @@ import joblib
 import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neural_network import MLPClassifier
 from sklearn.metrics.pairwise import cosine_similarity
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MODEL = ROOT / "models" / "ctgan_xgboost_strict_model.pkl"
+ENSEMBLE_MODEL = ROOT / "models" / "idea_validation_ensemble_models.pkl"
 DATA_DIR = ROOT / "data_sets"
 EMBEDDING_MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 _EMBEDDING_MODEL = None
 USE_HF_EMBEDDINGS = False
 _ARTIFACT_CACHE: dict[str, dict] = {}
+_ENSEMBLE_CACHE: dict[str, dict] = {}
 _FINAL_DATA_CACHE: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame] | None = None
 _GENERIC_CSV_CACHE: dict[str, pd.DataFrame] = {}
 EXTRA_DATASET_FILES = [
@@ -557,6 +561,89 @@ def find_comparables(idea: str, features: dict) -> dict:
     }
 
 
+def load_training_rows(input_columns: list[str]) -> tuple[pd.DataFrame, pd.Series]:
+    final_path = DATA_DIR / "final_training_data_v2.csv"
+    df = pd.read_csv(final_path)
+    if "target" not in df.columns:
+        raise ValueError(f"{final_path} must contain a target column.")
+
+    df = df.drop_duplicates().copy()
+    df["target"] = pd.to_numeric(df["target"], errors="coerce")
+    df = df[df["target"].isin([0, 1])]
+    if "sector" in df.columns:
+        df["sector_group"] = df["sector"].map(normalize_sector)
+    elif "sector_group" not in df.columns:
+        df["sector_group"] = "unknown"
+
+    if "funding_total_usd" in df.columns:
+        df["funding_total_usd"] = pd.to_numeric(df["funding_total_usd"], errors="coerce").fillna(0)
+        df["funding_log1p"] = np.log1p(df["funding_total_usd"].clip(lower=0))
+    if "company_age" in df.columns:
+        df["company_age"] = pd.to_numeric(df["company_age"], errors="coerce").fillna(1).clip(0, 100)
+
+    X = pd.DataFrame({column: df[column] if column in df.columns else np.nan for column in input_columns})
+    y = df["target"].astype(int)
+    return X, y
+
+
+def load_or_train_ensemble_models(artifact_key: str, artifact: dict, input_columns: list[str]) -> dict:
+    cache_key = f"{artifact_key}|{'|'.join(input_columns)}"
+    if cache_key in _ENSEMBLE_CACHE:
+        return _ENSEMBLE_CACHE[cache_key]
+
+    if ENSEMBLE_MODEL.exists():
+        try:
+            saved = joblib.load(ENSEMBLE_MODEL)
+            if saved.get("input_columns") == input_columns:
+                _ENSEMBLE_CACHE[cache_key] = saved
+                return saved
+        except Exception:
+            pass
+
+    X_train, y_train = load_training_rows(input_columns)
+    transformed = artifact["preprocessor"].transform(X_train)
+    rf = RandomForestClassifier(
+        n_estimators=260,
+        max_depth=9,
+        min_samples_leaf=3,
+        class_weight="balanced_subsample",
+        random_state=42,
+        n_jobs=-1,
+    )
+    ann = MLPClassifier(
+        hidden_layer_sizes=(32, 16),
+        activation="relu",
+        alpha=0.002,
+        learning_rate_init=0.003,
+        early_stopping=True,
+        validation_fraction=0.16,
+        max_iter=450,
+        random_state=42,
+    )
+    rf.fit(transformed, y_train)
+    ann.fit(transformed, y_train)
+
+    ensemble = {
+        "input_columns": input_columns,
+        "models": {
+            "random_forest": rf,
+            "ann": ann,
+        },
+        "roles": {
+            "xgboost": "Primary CTGAN-balanced tabular success predictor.",
+            "random_forest": "Independent tree-ensemble baseline for the same structured features.",
+            "ann": "Neural-network comparison model for non-linear feature interactions.",
+            "cosine_similarity": "Evidence retrieval layer for similar successes, failures, and references.",
+        },
+    }
+    try:
+        joblib.dump(ensemble, ENSEMBLE_MODEL)
+    except Exception:
+        pass
+    _ENSEMBLE_CACHE[cache_key] = ensemble
+    return ensemble
+
+
 def predict(payload: dict) -> dict:
     model_path = Path(payload.get("model_path") or DEFAULT_MODEL)
     artifact_key = str(model_path)
@@ -575,7 +662,15 @@ def predict(payload: dict) -> dict:
     features = build_features(payload)
     row = pd.DataFrame([{column: features.get(column, np.nan) for column in input_columns}])
     transformed = preprocessor.transform(row)
-    success_probability = float(model.predict_proba(transformed)[0][1])
+    xgboost_probability = float(model.predict_proba(transformed)[0][1])
+    ensemble_models = load_or_train_ensemble_models(artifact_key, artifact, input_columns)
+    random_forest_probability = float(ensemble_models["models"]["random_forest"].predict_proba(transformed)[0][1])
+    ann_probability = float(ensemble_models["models"]["ann"].predict_proba(transformed)[0][1])
+    success_probability = float(
+        (xgboost_probability * 0.5)
+        + (random_forest_probability * 0.25)
+        + (ann_probability * 0.25)
+    )
     prediction = int(success_probability >= threshold)
     comparables = find_comparables(clean_text(payload.get("idea")), features)
 
@@ -585,6 +680,27 @@ def predict(payload: dict) -> dict:
         "successProbability": success_probability,
         "failureProbability": 1.0 - success_probability,
         "threshold": threshold,
+        "modelPredictions": {
+            "xgboost": {
+                "successProbability": xgboost_probability,
+                "weight": 0.5,
+                "role": ensemble_models["roles"]["xgboost"],
+            },
+            "randomForest": {
+                "successProbability": random_forest_probability,
+                "weight": 0.25,
+                "role": ensemble_models["roles"]["random_forest"],
+            },
+            "ann": {
+                "successProbability": ann_probability,
+                "weight": 0.25,
+                "role": ensemble_models["roles"]["ann"],
+            },
+            "cosineSimilarity": {
+                "role": ensemble_models["roles"]["cosine_similarity"],
+                "method": "tfidf cosine similarity",
+            },
+        },
         "features": features,
         "comparables": comparables,
         "modelPath": str(model_path),

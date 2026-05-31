@@ -5,6 +5,11 @@
 
 const $ = (id) => document.getElementById(id);
 
+function apiUrl(path) {
+  const base = window.API_BASE_URL || (window.location.protocol === "file:" ? "http://localhost:3000" : "");
+  return `${base}${path}`;
+}
+
 let usersChartInst = null;
 let revenueChartInst = null;
 let runwayChartInst = null;
@@ -560,10 +565,11 @@ function renderWorldPanel(data) {
   const news = data.news || [];
   const pet = data.pet || {};
   const petEvents = pet.events || [];
+  const showPet = Boolean(pet.profile);
   const marketEvent = data.marketEvent;
   const due = data.dueConsequences || [];
   const actors = data.actors || {};
-  if (!news.length && !pet.profile && !marketEvent && !due.length && !actors.investor) {
+  if (!news.length && !showPet && !marketEvent && !due.length && !actors.investor) {
     panel.style.display = "none";
     return;
   }
@@ -584,7 +590,7 @@ function renderWorldPanel(data) {
       </div>
     </section>
     <section class="sim-card world-card">
-      <div class="sim-card-title">NEWS AGENT</div>
+      <div class="sim-card-title">MARKET SIGNALS</div>
       <div class="news-list">
         ${marketEvent ? `
           <article class="news-item negative">
@@ -617,6 +623,7 @@ function renderWorldPanel(data) {
         `).join("")}
       </div>
     </section>
+    ${showPet ? `
     <section class="sim-card world-card">
       <div class="sim-card-title">PET ENGINE</div>
       <div class="pet-profile">
@@ -635,6 +642,7 @@ function renderWorldPanel(data) {
         </div>
       ` : ""}
     </section>
+    ` : ""}
   `;
 }
 
@@ -832,14 +840,15 @@ function renderCharts(data) {
     color
   ) => {
     const canvas = $(canvasId);
-
     if (!canvas) return null;
+    if (instance) instance.destroy();
+    
+    const ctx = canvas.getContext("2d");
+    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, color.replace("1)", "0.2)"));
+    gradient.addColorStop(1, color.replace("1)", "0)"));
 
-    if (instance) {
-      instance.destroy();
-    }
-
-    return new Chart(canvas.getContext("2d"), {
+    return new Chart(ctx, {
       type: "line",
 
       data: {
@@ -849,10 +858,14 @@ function renderCharts(data) {
             label,
             data: values || [],
             borderColor: color,
-            backgroundColor: color,
-            fill: false,
-            tension: 0.35,
-            pointRadius: 3,
+            backgroundColor: gradient,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            pointBackgroundColor: color,
+            pointBorderColor: "#fff",
+            borderWidth: 3,
           },
         ],
       },
@@ -862,7 +875,8 @@ function renderCharts(data) {
         maintainAspectRatio: false,
         devicePixelRatio: Math.max(2, window.devicePixelRatio || 1),
         animation: {
-          duration: 450,
+          duration: 1000,
+          easing: "easeOutQuart"
         },
 
         plugins: {
@@ -1091,8 +1105,8 @@ function renderFounderLog(data) {
     ["Founder Engine", `${hidden.teamTrust ?? visible.morale ?? "--"}/100`, "Team trust"],
     ["Market Engine", `${visible.riskScore ?? hidden.competition ?? "--"}/100`, "Risk pressure"],
     ["Product Engine", `${hidden.productQuality ?? visible.technicalDebt ?? "--"}/100`, "Build quality"],
-    ["News Agent", `${(data.news || []).length} headlines`, "Press simulator"],
-    ["Pet Engine", data.pet?.profile?.name || "Active", "Culture simulator"],
+    ["Market Signals", `${(data.news || []).length} signals`, "Grounded external pressure"],
+    ...(data.pet?.profile ? [["Pet Engine", data.pet.profile.name || "Active", "Pet care culture simulator"]] : []),
     ["Tagline Engine", data.modelState?.tagline || startup.idea || sector, "Company thesis"],
   ];
   log.innerHTML = rows.map(([label, value]) => `
@@ -1113,7 +1127,7 @@ async function advanceSimulation(allocation, strategicAnswer, actorDecision = nu
     setStatus("Processing decision...");
 
   try {
-    const res = await fetch("/api/simulate/decision", {
+    const res = await fetch(apiUrl("/api/simulate/decision"), {
       method: "POST",
 
       headers: {
@@ -1128,7 +1142,7 @@ async function advanceSimulation(allocation, strategicAnswer, actorDecision = nu
       }),
     });
 
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
 
     if (!res.ok) {
       throw new Error(
@@ -1174,7 +1188,7 @@ async function runSimulation() {
       ui.simBtn.disabled = true;
     }
 
-    const res = await fetch("/api/simulate", {
+    const res = await fetch(apiUrl("/api/simulate"), {
       method: "POST",
 
       headers: {
@@ -1187,7 +1201,7 @@ async function runSimulation() {
       }),
     });
 
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
 
     if (!res.ok) {
       throw new Error(

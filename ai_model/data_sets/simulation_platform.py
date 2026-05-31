@@ -505,22 +505,22 @@ def operating_analysis(allocation, market_event=None, due=None):
     low = min(allocation.items(), key=lambda item: item[1])[0]
     labels = dict(OPERATING_CATEGORIES)
     positives = {
-        "rnd": "Product quality and long-term retention got oxygen.",
-        "marketing": "Acquisition pressure increased and the market heard from you.",
-        "compliance": "Trust, procurement readiness, and regulatory resilience improved.",
-        "clinical_ops": "Customer workflow learning and retention improved.",
-        "hiring": "Team capacity improved and morale had more support.",
-        "cloud": "Reliability and user experience were protected.",
-        "founder_salary": "Founder burnout risk was treated as an operating risk.",
+        "rnd": "You poured fuel on the core product. Technical debt shrank, and power users noticed the speed.",
+        "marketing": "You bought pure acquisition momentum. The market is talking about you, and top-of-funnel is buzzing.",
+        "compliance": "You bulletproofed the foundation. Enterprise procurement is suddenly answering your emails.",
+        "clinical_ops": "You hand-held the users. Churn dropped, and they actually understand the workflow now.",
+        "hiring": "You added serious muscle to the team. Capacity is up, and burnout risk just plummeted.",
+        "cloud": "You bought peace of mind. Uptime is flawless, and the user experience feels instantaneous.",
+        "founder_salary": "You paid yourself. You can finally afford rent, and the existential dread has dialed back a notch.",
     }
     sacrifices = {
-        "rnd": "Less R&D can create hidden product and technical debt.",
-        "marketing": "Less marketing can slow the fundraising story even if the product improves.",
-        "compliance": "Less compliance can become a delayed procurement or regulatory block.",
-        "clinical_ops": "Less customer ops can make churn look random until it is too late.",
-        "hiring": "Less hiring keeps burn lean but can silently damage morale.",
-        "cloud": "Less infrastructure spend can turn growth into reliability pain.",
-        "founder_salary": "Less founder pay extends cash but raises burnout risk.",
+        "rnd": "You starved engineering. You might ship this month, but technical debt is silently compounding into a future crisis.",
+        "marketing": "You went completely dark. Your product might be great, but nobody knows you exist right now.",
+        "compliance": "You moved fast and broke things. Expect a brutal regulatory or procurement wall to hit you soon.",
+        "clinical_ops": "You abandoned the users. The product is confusing, and they are silently churning out the back door.",
+        "hiring": "You ran the team ragged. Burn is lean, but morale is breaking and capacity is completely redlined.",
+        "cloud": "You cheaped out on infrastructure. Growth is starting to feel like a liability as the servers strain.",
+        "founder_salary": "You chose the startup over yourself. Cash is saved, but you're running dangerously close to complete burnout.",
     }
     tradeoffs = [
         f"Highest allocation: {labels.get(high, high)} at {round(ratio(allocation[high], total) * 100)}%. {positives[high]}",
@@ -531,9 +531,9 @@ def operating_analysis(allocation, market_event=None, due=None):
     for item in due or []:
         tradeoffs.append(f"Delayed consequence: {item.get('message')}")
     return {
-        "beginnerChoice": "Beginner founders optimize one visible metric and miss the constraints moving underneath it.",
-        "smartChoice": "Experienced founders manage tradeoff loops: growth, trust, quality, runway, and team capacity.",
-        "why": "This month was resolved from resource allocation, external shocks, hidden variables, and delayed consequences.",
+        "beginnerChoice": "Rookie founders optimize one vanity metric and completely miss the structural decay happening underneath it.",
+        "smartChoice": "Veterans play the entire board: managing the brutal tradeoff loops between growth, trust, runway, and team sanity.",
+        "why": "This month was a collision of resource scarcity, external shocks, and the delayed consequences of your past decisions.",
         "tradeoffs": tradeoffs,
     }
 
@@ -701,16 +701,16 @@ def chart_point(label, visible, previous=None):
 def lesson_from_outcome(outcome=None):
     if not outcome:
         return {
-            "beginnerChoice": "Beginner founders often chase visible progress before the hard signal is proven.",
-            "smartChoice": "Experienced founders watch the system: runway, team trust, customer pain, and investor confidence.",
-            "why": "The model updates all of those variables together, so a decision can help one metric while quietly hurting another.",
+            "beginnerChoice": "Rookies chase shiny visible progress while the underlying engine quietly dies.",
+            "smartChoice": "Veterans relentlessly monitor the actual constraints: runway, team trust, and hard customer proof.",
+            "why": "A decision can spike your vanity metrics while silently destroying your optionality. You have to watch the whole system.",
         }
     if outcome.get("lesson"):
         return outcome["lesson"]
     return {
-        "beginnerChoice": "Beginner founders judge the choice only by the immediate outcome.",
-        "smartChoice": "Experienced founders ask what the choice did to future optionality.",
-        "why": outcome.get("narrative", "Every decision changes the state of the company, not just the current month."),
+        "beginnerChoice": "Rookies judge a choice purely by the immediate dopamine hit of the outcome.",
+        "smartChoice": "Veterans evaluate every move by asking what it did to their future optionality and leverage.",
+        "why": outcome.get("narrative", "Every decision permanently alters the state of the board. You are playing the long game."),
     }
 
 
@@ -795,12 +795,12 @@ def build_summary(agent, visible, outcome, status):
 
 def pattern_match(agent, visible):
     if visible["runwayMonths"] <= 3:
-        return "Your path currently resembles cash-constrained startups that must learn faster than they spend."
+        return "You are playing the classic 'default dead' survival game. If you don't find a wedge before the cash burns out, this company dies."
     if visible["technicalDebt"] > 60:
-        return "Your path currently resembles product-led teams that gained users before the system was stable."
+        return "You're a classic feature factory. You gained early users, but the system is a house of cards waiting to collapse."
     if visible["investorInterest"] > 65:
-        return "Your path currently resembles startups where narrative and traction are beginning to reinforce each other."
-    return "Your path currently resembles early founder-led validation: small signal, fragile runway, and a need for sharper customer proof."
+        return "You're entering the breakout phase. Your narrative and traction are compounding, and investors can smell the momentum."
+    return "You're in the messy middle: fragile runway, tiny signals, and a desperate need for undeniable customer proof."
 
 
 def start(payload):
