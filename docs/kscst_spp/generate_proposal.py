@@ -22,7 +22,8 @@ TEMPLATE = HERE / "KSCST_SPP_50S_Proposal_Format_template.docx"
 OUT_DOCX = HERE / "KSCST_SPP_50S_Proposal_Startup_Sandbox_FILLED.docx"
 DIAGRAM = HERE / "startup_sandbox_block_diagram.png"
 
-FONT = "Arial"
+FONT = "Cambria"
+HEADER_BLOCKS = 5  # logo + KSCST address lines keep the template's Arial
 BODY_PT = 11
 
 TITLE = (
@@ -240,6 +241,7 @@ def draw_block_diagram(path):
 
 def fill_part_a(doc):
     t = doc.tables[0]
+    reset_cell(t.rows[0].cells[0])
     set_label_value(t.rows[1].cells[-1].paragraphs[0], "Project Title:", TITLE)
     reset_cell(t.rows[1].cells[-1])
     set_label_value(t.rows[2].cells[-1].paragraphs[0], "Keywords (5–8):", KEYWORDS)
@@ -608,6 +610,42 @@ def fill_declaration(doc):
             fill_cell(t.rows[0].cells[2], TITLE)
 
 
+def set_font(rpr):
+    fonts = rpr.find(qn("w:rFonts"))
+    if fonts is None:
+        fonts = OxmlElement("w:rFonts")
+        rpr.insert(0, fonts)
+    for attr in list(fonts.attrib):
+        if attr.endswith("Theme"):
+            del fonts.attrib[attr]
+    for attr in ("w:ascii", "w:hAnsi", "w:cs", "w:eastAsia"):
+        fonts.set(qn(attr), FONT)
+
+
+def restyle(doc):
+    """Match the reference: Cambria text, uppercase blue labels, rows that size to content."""
+    for block in list(doc.element.body.iterchildren())[HEADER_BLOCKS:]:
+        for r in block.iter(qn("w:r")):
+            set_font(r.get_or_add_rPr())
+            color = r.rPr.find(qn("w:color"))
+            if color is not None and color.get(qn("w:val"), "").upper() == "0000FF":
+                for t in r.iter(qn("w:t")):
+                    t.text = t.text.upper()
+        for ppr in block.iter(qn("w:pPr")):
+            rpr = ppr.find(qn("w:rPr"))
+            if rpr is not None:
+                set_font(rpr)
+    # Part A and SPP coordinator tables are filled in UPPERCASE per KSCST instructions.
+    for table in (doc.tables[0], doc.tables[2]):
+        for t in table._tbl.iter(qn("w:t")):
+            t.text = t.text.upper()
+    for tr in doc.element.body.iter(qn("w:tr")):
+        trPr = tr.find(qn("w:trPr"))
+        if trPr is not None:
+            for h in trPr.findall(qn("w:trHeight")):
+                trPr.remove(h)
+
+
 def build():
     draw_block_diagram(DIAGRAM)
     doc = Document(str(TEMPLATE))
@@ -618,6 +656,7 @@ def build():
     fill_declaration(doc)
     for hl in list(doc.element.body.iter(qn("w:highlight"))):
         hl.getparent().remove(hl)
+    restyle(doc)
     doc.save(str(OUT_DOCX))
     print(f"Wrote {OUT_DOCX}")
 
