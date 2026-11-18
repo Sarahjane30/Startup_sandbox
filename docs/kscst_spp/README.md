@@ -1,38 +1,26 @@
 # KSCST SPP 50S Proposal — Startup Sandbox
 
-Filled technical proposal for the **50th Series Student Project Programme (2026–2027)**, based on the Startup Sandbox project in this repository and structured like the provided Batch-1 reference PDF.
+Filled project proposal for the **50th Series Student Project Programme (2026–2027)**, based on the Startup Sandbox project in this repository.
+
+The proposal is produced by editing the **official KSCST Word template** in place (same logo header, "Page X of Y" footer, numbered Part A / Part B tables, declaration and fee-details pages), following the layout of the Batch-1 reference proposal: instruction notes, the Endorsement page and the KSCST bank-details page are removed.
 
 ## Files
 
 | File | Description |
 | --- | --- |
-| `KSCST_SPP_50S_Proposal_Startup_Sandbox_FILLED.docx` | Editable filled proposal (Word) |
-| `KSCST_SPP_50S_Proposal_Startup_Sandbox_FILLED.pdf` | PDF export (if generated) |
-| `generate_proposal.py` | Regenerates the `.docx` |
+| `KSCST_SPP_50S_Proposal_Startup_Sandbox_FILLED.docx` | Editable filled proposal |
+| `KSCST_SPP_50S_Proposal_Startup_Sandbox_FILLED.pdf` | PDF preview |
+| `KSCST_SPP_50S_Proposal_Format_template.docx` | Official KSCST template (converted from `.doc`) |
+| `startup_sandbox_block_diagram.png` | Block diagram inserted in Proposed Methodology |
+| `generate_proposal.py` | Regenerates the filled `.docx` from the template |
 
-## What is filled
+## Left blank for the applicant
 
-- Project title, keywords, Theme **04** (AI / Data Science / Digital Technologies)
-- Background, literature review, problem statement, objectives, novelty, methodology
-- Deliverables, outcomes, relevance ticks, 5-month work plan
-- Software-oriented facilities/requirements and budget estimate (₹8,000)
-- IEEE-style references
-- Declaration / payment section **headers** with project title pre-filled
-
-## Left blank for you
-
-All personal and institutional identity fields:
-
-- Institution / course / department / university / address
-- Project guide and SPP coordinator details
-- Student names, USN, photos, category, mobile, email, signatures
-- Payment / UTR / UPI / account-holder details
-- Seals and dates
-
-Replace every `[TO BE FILLED BY APPLICANT]` marker, obtain signatures, attach the ₹1,180 receipt, then submit via the KSCST Google Form.
+Institution details, project guide, student team table (photos, names, USN, category, contacts), SPP coordinator, payment/UTR details, signatures and seals. Facilities (item 18) contain generic entries — confirm them against your institution.
 
 ## Regenerate
 
 ```bash
+pip install python-docx pillow
 python3 docs/kscst_spp/generate_proposal.py
 ```
